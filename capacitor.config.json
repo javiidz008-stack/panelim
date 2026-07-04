@@ -1,9 +1,0 @@
-{
-  "appId": "com.example.panel",
-  "appName": "Panel",
-  "webDir": "www",
-  "bundledWebRuntime": false,
-  "server": {
-    "androidScheme": "https"
-  }
-}
