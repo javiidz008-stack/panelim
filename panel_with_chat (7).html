@@ -1,0 +1,3346 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c3aed">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Panel</title>
+<!-- Xarici CDN/API-lərə erkən bağlantı (DNS + TLS) — ilk sorğuların gecikməsini azaldır -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+<link rel="preconnect" href="https://esm.sh" crossorigin>
+<link rel="preconnect" href="https://uicdn.toast.com" crossorigin>
+<link rel="preconnect" href="https://www.omdbapi.com" crossorigin>
+<link rel="dns-prefetch" href="https://api.allorigins.win">
+<link rel="dns-prefetch" href="https://query1.finance.yahoo.com">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f3fd;
+    --bg3: #f0eafa;
+    --text: #120a1e;
+    --text2: #6b4d8a;
+    --text3: #aa90c8;
+    --border: rgba(120,60,200,0.1);
+    --border2: rgba(100,40,180,0.18);
+    --success-bg: #e8f5e1; --success-text: #2a6614;
+    --warn-bg: #fff3e0; --warn-text: #8a5200;
+    --info-bg: #ede7f6; --info-text: #512da8;
+    --danger-text: #e53935;
+    --radius: 10px; --radius-lg: 14px;
+    --pink: #7c3aed;
+    --pink-d: #5b21b6;
+    --pink-l: rgba(124,58,237,0.09);
+    --pink-g: linear-gradient(135deg,#a78bfa 0%,#7c3aed 50%,#5b21b6 100%);
+    --rose: #c4b5fd;
+    --mauve: #ddd6fe;
+    --teal: #7c3aed;
+    --teal-light: rgba(124,58,237,0.09);
+    --gold: #d4a017;
+    --shadow: 0 1px 4px rgba(124,58,237,0.07),0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 20px rgba(124,58,237,0.14);
+  }
+  @media (prefers-color-scheme:dark) {
+    :root {
+      --bg:#100818; --bg2:#180e24; --bg3:#100818;
+      --text:#ede9f8; --text2:#a080c8; --text3:#6a4e88;
+      --border:rgba(124,58,237,0.13); --border2:rgba(124,58,237,0.24);
+      --success-bg:#122e08; --success-text:#7dc45a;
+      --warn-bg:#362200; --warn-text:#f0a840;
+      --info-bg:#1e1040; --info-text:#c4b5fd;
+      --danger-text:#f87171;
+      --pink-l:rgba(124,58,237,0.15);
+      --teal-light:rgba(124,58,237,0.15);
+      --shadow:0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md:0 4px 20px rgba(124,58,237,0.3);
+    }
+  }
+
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg3); color:var(--text); min-height:100vh; }
+  .wrap { max-width:740px; margin:0 auto; padding:1.5rem 1rem 5rem; }
+
+  /* HEADER */
+  .hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+  .hdr-left h1 { font-size:21px; font-weight:700; letter-spacing:-0.4px; background:var(--pink-g); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .hdr-left span { font-size:12px; color:var(--text2); margin-top:2px; display:block; }
+
+  /* NAV */
+  .nav { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:1.5rem; background:var(--bg2); padding:4px; border-radius:var(--radius-lg); border:0.5px solid var(--border); }
+  .nt { padding:7px 14px; border-radius:8px; border:none; font-size:13px; cursor:pointer; background:transparent; color:var(--text2); transition:all .2s; font-weight:500; }
+  .nt.on { background:var(--pink-g); color:#fff; box-shadow:0 2px 8px rgba(124,58,237,0.3); }
+  .nt:hover:not(.on) { color:var(--pink); }
+
+  .sec { display:none; }
+  .sec.on { display:block; }
+  /* köhnə sadə fade-in — Animate.css yüklənməsə fallback kimi saxlanılır */
+  .sec.on:not(.animate__animated) { animation:secFadeIn .22s ease; }
+  @keyframes secFadeIn { from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  /* METRİK KARTLAR */
+  .mrow { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:1.5rem; }
+  .mc { background:var(--bg); border-radius:var(--radius); padding:.9rem 1rem; border:0.5px solid var(--border); box-shadow:var(--shadow); }
+  .mc-l { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; font-weight:500; }
+  .mc-v { font-size:22px; font-weight:700; letter-spacing:-0.5px; }
+  .mc-sub { font-size:11px; color:var(--text2); margin-top:3px; }
+
+  .stl { font-size:11px; font-weight:700; color:var(--pink-d); text-transform:uppercase; letter-spacing:.07em; margin:1.4rem 0 .75rem; }
+  .abar { display:flex; gap:8px; margin-bottom:1rem; flex-wrap:wrap; }
+  .abar input,.abar select { font-size:13px; padding:8px 11px; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--bg); color:var(--text); flex:1; min-width:80px; outline:none; transition:border-color .15s; }
+  .abar input:focus,.abar select:focus { border-color:var(--pink); }
+  .abar button { padding:8px 14px; border-radius:var(--radius); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; white-space:nowrap; font-weight:500; transition:all .15s; }
+  .abar button:hover { background:var(--bg2); }
+
+  /* LIST */
+  .elist { display:flex; flex-direction:column; gap:6px; }
+  .ent { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:10px 13px; display:flex; align-items:flex-start; gap:10px; box-shadow:var(--shadow); }
+  .ei { font-size:17px; color:var(--text2); flex-shrink:0; margin-top:2px; }
+  .eb { flex:1; min-width:0; }
+  .et { font-size:13px; font-weight:500; }
+  .em { font-size:11px; color:var(--text2); margin-top:3px; }
+  .eai { font-size:12px; color:var(--info-text); margin-top:5px; line-height:1.6; }
+  .edl { font-size:14px; color:var(--text3); cursor:pointer; padding:3px; flex-shrink:0; border-radius:6px; transition:all .15s; }
+  .edl:hover { color:var(--danger-text); background:rgba(229,57,53,0.08); }
+
+  .bdg { display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; margin-right:4px; font-weight:500; }
+  .bg { background:var(--success-bg); color:var(--success-text); }
+  .ba { background:var(--warn-bg); color:var(--warn-text); }
+  .bb { background:var(--info-bg); color:var(--info-text); }
+  .bp { background:rgba(124,58,237,0.1); color:var(--pink-d); }
+
+  .dcard { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1rem 1.1rem; margin-bottom:.75rem; box-shadow:var(--shadow); }
+  .dcard-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:.85rem; }
+  .dcard-t { font-size:14px; font-weight:600; }
+
+  .exrow { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:0.5px solid var(--border); }
+  .exrow:last-child { border-bottom:none; }
+  .exname-wrap { flex:1; min-width:0; }
+  .exname { font-size:13px; font-weight:500; }
+  .ex-cmp { font-size:10px; margin-top:2px; }
+  .ex-cmp.up { color:#2a9d2a; } .ex-cmp.dn { color:var(--danger-text); } .ex-cmp.eq { color:var(--text3); }
+  .exset { display:flex; gap:5px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .exset input { width:42px; font-size:12px; padding:4px 5px; border:0.5px solid var(--border2); border-radius:6px; background:var(--bg2); color:var(--text); text-align:center; outline:none; }
+  .exset input.inp-kg { border-color:rgba(124,58,237,0.3); width:50px; }
+  .exset input.inp-time { border-color:rgba(167,139,250,0.5); width:46px; }
+  .exset span { font-size:11px; color:var(--text2); }
+  .exset .lbl-kg { font-size:10px; color:var(--pink); font-weight:600; }
+  .exset .lbl-san { font-size:10px; color:var(--pink); font-weight:600; }
+  .exck { width:17px; height:17px; cursor:pointer; accent-color:var(--pink); flex-shrink:0; margin-top:2px; }
+
+  .pb { background:var(--bg2); border-radius:20px; height:5px; margin-top:8px; overflow:hidden; }
+  .pbi { height:5px; border-radius:20px; background:var(--pink-g); transition:width .4s; }
+  .prog-txt { font-size:11px; color:var(--text2); margin-top:5px; margin-bottom:1rem; }
+
+  .cardio-btns { display:flex; gap:8px; margin-bottom:1rem; }
+  .cb { flex:1; padding:11px; border-radius:var(--radius); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; display:flex; flex-direction:column; align-items:center; gap:5px; transition:all .15s; box-shadow:var(--shadow); }
+  .cb:hover { background:var(--bg2); }
+  .cb.sel { border-color:var(--pink); background:var(--pink-l); color:var(--pink-d); }
+  .cb svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+
+  .dur-row { display:flex; align-items:center; gap:10px; margin-bottom:1rem; }
+  .dur-row label { font-size:13px; color:var(--text2); white-space:nowrap; }
+  .dur-row input[type=range] { flex:1; accent-color:var(--pink); }
+  .dur-row span { font-size:13px; font-weight:500; min-width:55px; }
+
+  /* Bədən çəkisi kartı */
+  .weight-hero { background:var(--pink-g); border-radius:var(--radius-lg); padding:1.2rem 1.4rem; margin-bottom:1.2rem; color:#fff; box-shadow:0 4px 20px rgba(124,58,237,0.3); }
+  .wh-top { display:flex; justify-content:space-between; align-items:flex-start; }
+  .wh-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; opacity:.75; margin-bottom:4px; }
+  .wh-val { font-size:40px; font-weight:800; letter-spacing:-2px; line-height:1; }
+  .wh-unit { font-size:15px; font-weight:400; opacity:.8; }
+  .wh-delta { font-size:12px; margin-top:6px; opacity:.85; }
+  .wh-hist { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+  .wh-dot { font-size:11px; background:rgba(255,255,255,0.2); border-radius:20px; padding:3px 8px; }
+  /* Chart.js-in canvas-ı hər render zamanı şişirtməsinin qarşısı: sabit hündürlüklü, position:relative qab */
+  .wh-chart-wrap { position:relative; width:100%; height:70px; margin-top:10px; }
+  .wh-chart-wrap canvas { position:absolute; inset:0; width:100% !important; height:100% !important; }
+  .wh-add { display:flex; gap:8px; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.2); padding-top:1rem; }
+  .wh-add input { flex:1; font-size:15px; font-weight:600; padding:8px 11px; border:1.5px solid rgba(255,255,255,0.35); border-radius:var(--radius); background:rgba(255,255,255,0.18); color:#fff; outline:none; }
+  .wh-add input::placeholder { color:rgba(255,255,255,0.6); }
+  .wh-add button { padding:8px 15px; border-radius:var(--radius); border:none; background:#fff; color:var(--pink-d); font-weight:700; cursor:pointer; font-size:13px; white-space:nowrap; transition:opacity .15s; }
+  .wh-add button:hover { opacity:.88; }
+
+  /* Foto area */
+  /* (Foto-AI stilləri silindi) */
+
+  /* Protein skalası */
+  .prot-card { background:var(--bg); border:0.5px solid var(--border2); border-radius:var(--radius-lg); padding:1rem 1.2rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+  .prot-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem; }
+  .prot-title { font-size:11px; font-weight:700; color:var(--pink-d); text-transform:uppercase; letter-spacing:.06em; }
+  .prot-goal { font-size:24px; font-weight:800; color:var(--pink); line-height:1; }
+  .prot-goal sub { font-size:12px; font-weight:400; color:var(--text2); }
+  .prot-track { height:12px; background:var(--bg2); border-radius:20px; overflow:hidden; margin:8px 0 4px; border:0.5px solid var(--border); position:relative; }
+  .prot-fill { height:100%; background:var(--pink-g); border-radius:20px; transition:width .6s cubic-bezier(.4,0,.2,1); position:relative; }
+  .prot-fill::after { content:''; position:absolute; right:0; top:0; height:100%; width:3px; background:rgba(255,255,255,0.5); border-radius:0 20px 20px 0; }
+  .prot-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-bottom:4px; }
+  .prot-status { font-size:12px; color:var(--text2); }
+  .prot-status strong { color:var(--pink-d); }
+
+  /* Nutrition input row */
+  .nutr-row { display:grid; grid-template-columns:1fr 90px 80px auto; gap:7px; margin-bottom:1rem; align-items:end; }
+  .nutr-field { display:flex; flex-direction:column; gap:3px; }
+  .nutr-field label { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
+  .nutr-field input { padding:8px 10px; font-size:13px; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--bg); color:var(--text); outline:none; transition:border-color .15s; }
+  .nutr-field input:focus { border-color:var(--pink); }
+  .nutr-sumrow { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:1rem; }
+  .nutr-sum { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:.75rem 1rem; box-shadow:var(--shadow); }
+  .nutr-sum-l { font-size:10px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; margin-bottom:4px; color:var(--pink-d); }
+  .nutr-sum-v { font-size:20px; font-weight:800; color:var(--pink); }
+  .nutr-sum-u { font-size:10px; color:var(--text2); }
+  .nutr-sum.mauve .nutr-sum-l { color:var(--pink-d); }
+  .nutr-sum.mauve .nutr-sum-v { color:var(--pink); }
+
+  /* MEDIA */
+  .media-tabs { display:flex; gap:5px; margin-bottom:1rem; background:var(--bg2); padding:4px; border-radius:var(--radius); }
+  .mtab { padding:6px 13px; border-radius:7px; border:none; font-size:13px; cursor:pointer; background:transparent; color:var(--text2); font-weight:500; transition:all .15s; }
+  .mtab.on { background:var(--pink-g); color:#fff; box-shadow:0 2px 8px rgba(124,58,237,0.25); }
+
+  /* MEDİA KANBAN — sürüşdürüb status dəyişmək üçün */
+  .media-kanban { display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:1rem; -webkit-overflow-scrolling:touch; }
+  .kanban-col { flex:1 0 165px; min-width:165px; background:var(--bg2); border-radius:var(--radius-lg); padding:8px; display:flex; flex-direction:column; }
+  .kanban-col-head { font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; padding:0 2px; }
+  .kanban-count { background:var(--bg); border-radius:20px; padding:1px 7px; font-size:10px; color:var(--pink-d); font-weight:700; }
+  .kanban-list { display:flex; flex-direction:column; gap:6px; min-height:40px; flex:1; }
+  .kanban-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:8px 9px; box-shadow:var(--shadow); cursor:grab; display:flex; gap:8px; align-items:flex-start; }
+  .kanban-card:active { cursor:grabbing; }
+  .kanban-card .kc-img { width:28px; height:40px; object-fit:cover; border-radius:4px; flex-shrink:0; }
+  .kanban-card a.pswp-poster { display:block; flex-shrink:0; cursor:zoom-in; }
+  .kanban-card .kc-icon { font-size:15px; flex-shrink:0; }
+  .kanban-card .kc-title { font-size:12.5px; font-weight:600; line-height:1.25; overflow-wrap:anywhere; }
+  .kanban-card .kc-meta { font-size:10px; color:var(--text2); margin-top:3px; }
+  .kanban-card .kc-del { position:absolute; }
+  .kanban-empty { font-size:11px; color:var(--text3); text-align:center; padding:10px 0; }
+  .kanban-list .sortable-ghost { opacity:0.35; }
+  .kanban-list .sortable-chosen { box-shadow:0 4px 14px rgba(124,58,237,0.3); }
+  .kanban-drophint { font-size:10.5px; color:var(--text3); text-align:center; margin:-2px 0 .9rem; }
+
+  .lbitem { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:0.5px solid var(--border); }
+  .lbitem:last-child { border-bottom:none; }
+  .lbpic { width:38px; height:56px; border-radius:5px; background:var(--bg2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px; color:var(--text2); }
+  .lbinfo { flex:1; min-width:0; }
+  .lbtit { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lbmeta { font-size:11px; color:var(--text2); margin-top:3px; }
+  .lbsel { font-size:11px; padding:5px 8px; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--bg); color:var(--text); }
+
+  .btn { padding:7px 14px; border-radius:var(--radius); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); cursor:pointer; font-size:13px; font-weight:500; box-shadow:var(--shadow); transition:all .15s; }
+  .btn:hover { background:var(--bg2); }
+  .btn-pink { background:var(--pink-g); color:#fff; border-color:var(--pink); box-shadow:0 2px 8px rgba(124,58,237,0.3); }
+  .btn-pink:hover { opacity:.9; }
+  .empty { font-size:13px; color:var(--text2); padding:8px 0; }
+
+  /* MODAL */
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+  .modal-bg.open { display:flex; }
+  .modal { background:var(--bg); border-radius:var(--radius-lg); padding:1.5rem; width:380px; max-width:95vw; box-shadow:var(--shadow-md); max-height:90vh; overflow-y:auto; }
+  .modal h3 { font-size:16px; font-weight:700; margin-bottom:1.1rem; }
+  .modal input,.modal select { width:100%; font-size:14px; padding:9px 11px; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--bg2); color:var(--text); margin-bottom:.75rem; outline:none; transition:border-color .15s; }
+  .modal input:focus { border-color:var(--pink); }
+  .modal-btns { display:flex; gap:8px; margin-top:.5rem; }
+  .modal-btns button { flex:1; padding:9px; border-radius:var(--radius); border:0.5px solid var(--border2); cursor:pointer; font-size:13px; background:transparent; color:var(--text); font-weight:500; }
+  .modal-btns .primary { background:var(--pink-g); color:#fff; border-color:var(--pink); }
+
+  /* Müqayisə modalı */
+  .cmp-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:0.5px solid var(--border); font-size:13px; }
+  .cmp-row:last-child { border-bottom:none; }
+  .cmp-vals { display:flex; gap:10px; align-items:center; }
+  .cmp-prev { font-size:11px; color:var(--text3); }
+  .cmp-now { font-weight:600; }
+  .cmp-delta { font-size:10px; font-weight:700; padding:2px 6px; border-radius:20px; }
+  .cmp-delta.up { background:var(--success-bg); color:var(--success-text); }
+  .cmp-delta.dn { background:var(--info-bg); color:var(--pink-d); }
+  .cmp-delta.eq { background:var(--bg2); color:var(--text3); }
+
+  /* MALİYYƏ */
+  .kapital-card { background:var(--pink-g); border-radius:var(--radius-lg); padding:1.25rem 1.4rem; margin-bottom:1.25rem; color:#fff; box-shadow:0 4px 20px rgba(124,58,237,0.35); }
+  .kapital-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; opacity:.75; margin-bottom:6px; }
+  .kapital-total { font-size:36px; font-weight:800; letter-spacing:-1px; }
+  .kapital-sub { font-size:12px; opacity:.7; margin-top:4px; }
+  .kapital-breakdown { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.2); padding-top:1rem; }
+  .kap-item label { font-size:9px; opacity:.7; font-weight:500; text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:3px; }
+  .kap-item .kv { font-size:14px; font-weight:700; }
+  .gelir-badge { font-size:11px; background:rgba(255,255,255,0.2); border-radius:20px; padding:2px 8px; margin-top:2px; display:inline-block; }
+
+  .cash-card-grid { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:1rem; }
+  .cash-section { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1rem; box-shadow:var(--shadow); }
+  .cash-section-title { font-size:12px; font-weight:700; color:var(--pink-d); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.85rem; display:flex; align-items:center; gap:6px; }
+  .cash-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+  .cash-row:last-child { margin-bottom:0; }
+  .cash-row input { flex:1; font-size:14px; font-weight:500; padding:7px 9px; border:0.5px solid var(--border2); border-radius:8px; background:var(--bg2); color:var(--text); outline:none; min-width:0; transition:border-color .15s; }
+  .cash-row input:focus { border-color:var(--pink); }
+  .cash-row label { font-size:11px; color:var(--text2); min-width:50px; flex-shrink:0; }
+  .cash-add-btn { padding:5px 9px; border-radius:7px; border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; font-size:12px; font-weight:500; flex-shrink:0; white-space:nowrap; transition:all .15s; }
+  .cash-add-btn:hover { background:var(--bg3); }
+  .cash-delete-btn { color:var(--text3); cursor:pointer; font-size:13px; padding:2px; border-radius:5px; flex-shrink:0; transition:all .15s; }
+  .cash-delete-btn:hover { color:var(--danger-text); }
+  .cash-total { font-size:11px; color:var(--text2); margin-top:.6rem; padding-top:.6rem; border-top:0.5px solid var(--border); display:flex; justify-content:space-between; }
+  .cash-total strong { color:var(--text); font-weight:600; }
+
+  .fin-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1rem; }
+  .fin-field { display:flex; flex-direction:column; gap:4px; }
+  .fin-field label { font-size:11px; color:var(--text2); font-weight:500; }
+  .fin-field input { font-size:15px; padding:9px 11px; font-weight:500; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--bg); color:var(--text); outline:none; transition:border-color .15s; }
+  .fin-field input:focus { border-color:var(--pink); }
+
+  .borc-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:10px 13px; margin-bottom:7px; box-shadow:var(--shadow); }
+  .borc-main { display:flex; justify-content:space-between; align-items:center; }
+  .borc-info { flex:1; }
+  .borc-name { font-size:13px; font-weight:500; }
+  .borc-det { font-size:11px; color:var(--text2); margin-top:2px; }
+  .borc-am { font-size:15px; font-weight:600; color:var(--warn-text); }
+  .borc-extra { margin-top:8px; border-top:0.5px solid var(--border); padding-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .borc-daily-row { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); flex:1; }
+  .borc-daily-row input { width:70px; font-size:12px; padding:4px 7px; border:0.5px solid var(--border2); border-radius:6px; background:var(--bg2); color:var(--text); outline:none; }
+  .borc-accrued { font-size:12px; font-weight:600; color:var(--pink); }
+
+  .inv-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1rem; margin-bottom:.7rem; box-shadow:var(--shadow); }
+  .inv-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.6rem; }
+  .inv-name { font-size:14px; font-weight:600; }
+  .inv-ticker { font-size:11px; color:var(--text2); margin-top:2px; }
+  .inv-price { text-align:right; }
+  .inv-cur { font-size:16px; font-weight:600; }
+  .inv-chg { font-size:12px; margin-top:2px; font-weight:500; }
+  .inv-chg.up { color:#2a9d2a; }
+  .inv-chg.dn { color:var(--danger-text); }
+  .inv-stats { display:flex; gap:14px; font-size:12px; color:var(--text2); margin-top:.6rem; flex-wrap:wrap; }
+  .inv-chart { margin-top:.75rem; height:60px; width:100%; }
+  .inv-azn-badge { font-size:11px; background:var(--pink-l); color:var(--pink-d); border-radius:20px; padding:2px 8px; font-weight:600; display:inline-block; margin-top:3px; }
+
+  .sparkline { stroke:var(--pink); stroke-width:1.5; fill:none; }
+  .sparkline-area { fill:rgba(124,58,237,0.08); stroke:none; }
+
+  /* Yuxu tracker */
+  .sleep-card { background:var(--bg); border:0.5px solid var(--border2); border-radius:var(--radius-lg); padding:1rem 1.2rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+  .sleep-row { display:flex; align-items:center; gap:10px; margin-bottom:.5rem; }
+  .sleep-row label { font-size:13px; color:var(--text2); white-space:nowrap; }
+  .sleep-row input[type=range] { flex:1; accent-color:var(--pink); }
+  .sleep-row span { font-size:14px; font-weight:600; min-width:60px; text-align:right; }
+  .sleep-corr { font-size:12px; color:var(--text2); margin-top:6px; line-height:1.6; }
+  .sleep-corr strong { color:var(--pink-d); }
+  .sleep-hist { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+  .sleep-dot { font-size:11px; background:var(--bg2); border-radius:20px; padding:3px 8px; color:var(--text2); }
+  .sleep-dot.workout { background:var(--pink-l); color:var(--pink-d); font-weight:600; }
+
+  /* Chart kartları */
+  .chart-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1rem 1.1rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+  .chart-card-t { font-size:12px; font-weight:700; color:var(--pink-d); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.85rem; }
+  .bar-chart { display:flex; align-items:flex-end; gap:8px; height:140px; }
+  .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:4px; }
+  .bar-stack { width:100%; max-width:34px; display:flex; flex-direction:column-reverse; border-radius:6px 6px 0 0; overflow:hidden; flex:1; align-items:stretch; justify-content:flex-end; background:var(--bg2); }
+  .bar-seg { width:100%; transition:height .4s; }
+  .bar-seg.kcal { background:var(--pink-g); }
+  .bar-seg.prot { background:var(--rose); }
+  .bar-lbl { font-size:10px; color:var(--text2); margin-top:2px; }
+  .bar-val { font-size:9px; color:var(--text3); }
+  .legend-row { display:flex; gap:14px; margin-top:.8rem; font-size:11px; color:var(--text2); }
+  .legend-dot { display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:4px; vertical-align:middle; }
+
+  /* Pie chart */
+  .pie-wrap { display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap; }
+  .pie-legend { flex:1; min-width:140px; display:flex; flex-direction:column; gap:6px; }
+  .pie-legend-row { display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+  .pie-legend-row .lbl { display:flex; align-items:center; gap:6px; color:var(--text); }
+  .pie-legend-row .val { font-weight:600; color:var(--text2); }
+
+  /* Hədəf */
+  .goal-card { background:var(--bg); border:0.5px solid var(--border2); border-radius:var(--radius-lg); padding:1rem 1.2rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+  .goal-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.5rem; }
+  .goal-title { font-size:12px; font-weight:700; color:var(--pink-d); text-transform:uppercase; letter-spacing:.05em; }
+  .goal-track { height:14px; background:var(--bg2); border-radius:20px; overflow:hidden; margin:8px 0 4px; border:0.5px solid var(--border); }
+  .goal-fill { height:100%; background:var(--pink-g); border-radius:20px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+  .goal-status { font-size:12px; color:var(--text2); }
+  .goal-status strong { color:var(--pink-d); }
+  .goal-set-row { display:flex; gap:8px; margin-top:.85rem; border-top:0.5px solid var(--border); padding-top:.85rem; }
+  .goal-set-row input { flex:1; }
+
+  /* Valyuta çevirici */
+  /* (Valyuta çevirici stilləri silindi) */
+
+  /* TƏQVİM */
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:1.2rem; }
+  .cal-dow { font-size:10px; text-align:center; color:var(--text2); font-weight:600; padding:4px 0; text-transform:uppercase; letter-spacing:.04em; }
+  .cal-day { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:13px; border-radius:8px; cursor:pointer; background:var(--bg); border:0.5px solid var(--border); position:relative; transition:all .15s; box-shadow:var(--shadow); }
+  .cal-day:hover { background:var(--bg2); }
+  .cal-day.empty { visibility:hidden; cursor:default; box-shadow:none; border:none; background:transparent; }
+  .cal-day.today { border-color:var(--pink); color:var(--pink-d); font-weight:700; }
+  .cal-day.selected { background:var(--pink-g); color:#fff; border-color:transparent; box-shadow:var(--shadow-md); }
+  .cal-day.has-task::after { content:''; position:absolute; bottom:5px; width:5px; height:5px; border-radius:50%; background:var(--pink); }
+  .cal-day.selected.has-task::after { background:#fff; }
+  .cal-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:.75rem; }
+  .cal-nav-btns { display:flex; gap:6px; }
+  .cal-month-label { font-size:14px; font-weight:600; }
+
+  @media(max-width:500px){
+    .fin-grid { grid-template-columns:1fr; }
+    .kapital-breakdown { grid-template-columns:1fr 1fr; }
+    .media-tabs { flex-wrap:wrap; }
+    .nutr-row { grid-template-columns:1fr 1fr; }
+    .nutr-row button { grid-column:1/-1; }
+    .exset { justify-content:flex-start; }
+  }
+  /* SKELETON LOADING */
+  .skeleton-overlay { position:fixed; inset:0; z-index:9999; background:var(--bg3); max-width:740px; margin:0 auto; padding:1.5rem 1rem; display:flex; flex-direction:column; gap:12px; overflow:hidden; }
+  .skel-hdr { height:26px; width:40%; border-radius:8px; }
+  .skel-nav { height:38px; border-radius:var(--radius-lg); }
+  .skel-hero { height:110px; border-radius:var(--radius-lg); }
+  .skel-row { height:60px; border-radius:var(--radius); }
+  .skel-hdr,.skel-nav,.skel-hero,.skel-row { background:var(--bg2); position:relative; overflow:hidden; }
+  .skel-hdr::after,.skel-nav::after,.skel-hero::after,.skel-row::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg,transparent,rgba(124,58,237,0.14),transparent);
+    animation:skel-shimmer 1.3s infinite;
+  }
+  @keyframes skel-shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+  /* AY MÜQAYİSƏSİ KARTI */
+  .cmp-card { display:flex; gap:10px; margin-bottom:1rem; }
+  .cmp-box { flex:1; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:.8rem .9rem; box-shadow:var(--shadow); }
+  .cmp-lbl { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .cmp-val { font-size:18px; font-weight:700; }
+  .cmp-delta { font-size:11px; margin-top:3px; font-weight:600; }
+  .cmp-delta.up { color:var(--danger-text); } /* xərc/kalori artımı — mənfi işıqda */
+  .cmp-delta.dn { color:#2a9d2a; }
+  .cmp-delta.eq { color:var(--text3); }
+</style>
+<!--
+  Qeyd (yahoo-finance2 haqqında):
+  yahoo-finance2 npm paketi Node.js üçündür (server tərəfi, fs/http kimi Node
+  modullarına bağlıdır) və brauzerdə birbaşa .html faylında işləmir.
+  Bu panel artıq eyni məlumatı (Yahoo Finance chart API + CORS proxy) birbaşa
+  brauzerdən çəkən öz "yahooQuote()" funksiyasına malikdir (aşağıda), ona görə
+  ayrıca kitabxana qoşmağa ehtiyac yoxdur — funksionallıq artıq mövcuddur.
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.5/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/technicalindicators@3.1.0/dist/browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<!-- ── Yeni əlavə olunan kitabxanalar ── -->
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/customParseFormat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/locale/az.js"></script>
+<link rel="stylesheet" href="https://uicdn.toast.com/calendar/v2.1.3/toastui-calendar.min.css">
+<script src="https://uicdn.toast.com/calendar/v2.1.3/toastui-calendar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dexie@4.0.8/dist/dexie.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+
+<!--
+  Qeyd (əlavə istənilən kitabxanalar haqqında):
+
+  1) simonbengtsson/calendar-heatmap — bu paket əslində AngularJS direktividir
+     və köhnə d3 v3-ə bağlıdır; bu panel isə vanilla JS-dir, AngularJS yoxdur.
+     Ona görə paketin özünü qoşmaq əvəzinə, eyni GitHub-tipli "aktivlik xəritəsi"
+     funksionallığını asılılıqsız (heç bir əlavə kitabxana olmadan), sırf SVG ilə
+     "Təqvim" bölməsində həyata keçirdik (bax: renderActivityHeatmap()).
+
+  2) ionic-team/capacitor — Capacitor bir runtime kitabxanası deyil, native
+     (iOS/Android) layihə qurmaq üçün CLI + tərtibat alətidir; tək bir .html
+     faylına <script> ilə "qoşulmur". Onun əvəzinə ayrıca capacitor.config.json
+     faylı hazırlanıb (çıxış fayllarına baxın) — bunu "npm i @capacitor/core
+     @capacitor/cli && npx cap init" addımları ilə native layihəyə çevirmək
+     üçün istifadə edə bilərsiniz.
+
+  3) pmndrs/valtio — "valtio/vanilla" ESM importu ilə (aşağıdakı importmap və
+     module script) əlavə olunub, reaktiv "uiState" üçün istifadə edilir.
+
+  4) xenova/transformers (Transformers.js) — brauzerdə on-device AI üçün ESM
+     CDN ilə əlavə olunub, "Təqvim" bölməsindəki "AI notu təhlil et" düyməsi
+     ilə işə düşür (ilk klikdə model yüklənir, bir neçə saniyə çəkə bilər).
+-->
+<script type="importmap">
+{
+  "imports": {
+    "valtio/vanilla": "https://esm.sh/valtio@2/vanilla"
+  }
+}
+</script>
+</head>
+<body>
+<div id="skeleton-overlay" class="skeleton-overlay" style="display:none">
+  <div class="skel-hdr"></div>
+  <div class="skel-nav"></div>
+  <div class="skel-hero"></div>
+  <div class="skel-row"></div>
+  <div class="skel-row"></div>
+  <div class="skel-row" style="height:140px"></div>
+</div>
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Panel ✦</h1>
+      <span id="dts"></span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span id="sync-status" onclick="if(syncConfig)manualPull()" style="font-size:10px;color:var(--text2);cursor:pointer" title="Klikləyin: buluddan yenilə"></span>
+      <button id="pwa-install-btn" onclick="installPwa()" title="Tətbiqi cihaza yüklə" style="display:none;padding:7px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;font-size:13px"><i data-lucide="download" style="width:14px;height:14px"></i></button>
+      <button onclick="exportAllData()" title="Bütün datanı JSON kimi ixrac et" style="padding:7px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;font-size:13px"><i data-lucide="hard-drive-download" style="width:14px;height:14px"></i></button>
+      <label title="JSON-dan idxal et" style="padding:7px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;font-size:13px;display:inline-flex;align-items:center">
+        <i data-lucide="hard-drive-upload" style="width:14px;height:14px"></i>
+        <input type="file" accept="application/json" onchange="importAllData(this.files[0])" style="display:none">
+      </label>
+      <button onclick="setupSync()" title="Bulud sinxronizasiyası" style="padding:7px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;font-size:13px">☁️</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nt on" onclick="sw('fit')"><i data-lucide="dumbbell" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"></i>İdman</button>
+    <button class="nt" onclick="sw('food')"><i data-lucide="utensils" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"></i>Qida</button>
+    <button class="nt" onclick="sw('media')"><i data-lucide="clapperboard" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"></i>Media</button>
+    <button class="nt" onclick="sw('fin')"><i data-lucide="wallet" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"></i>Maliyyə</button>
+    <button class="nt" onclick="sw('cal')"><i data-lucide="calendar-days" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"></i>Təqvim</button>
+  </div>
+
+  <!-- ═══ İDMAN ═══ -->
+  <div class="sec on" id="s-fit">
+    <!-- Bədən çəkisi hero kartı -->
+    <div class="weight-hero" id="weight-hero">
+      <div class="wh-top">
+        <div>
+          <div class="wh-label">Bədən Çəkim</div>
+          <div><span class="wh-val" id="wh-val">—</span> <span class="wh-unit">kq</span></div>
+          <div class="wh-delta" id="wh-delta">Hələ qeyd yoxdur</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;opacity:.7;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Son qeydlər</div>
+          <div class="wh-hist" id="wh-hist" style="justify-content:flex-end;gap:4px"></div>
+        </div>
+      </div>
+      <div class="wh-chart-wrap"><canvas id="weight-trend-chart"></canvas></div>
+      <div class="wh-add">
+        <input type="number" id="wt-input" placeholder="Çəki (kq) — məs: 78.5" step="0.1" min="30" max="250">
+        <button onclick="addWeight()">+ Qeyd et</button>
+      </div>
+    </div>
+
+    <div class="mrow" id="fm"></div>
+
+    <div class="stl" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Bu günün trenirovkası</span>
+      <button class="btn" style="font-size:11px;padding:4px 10px;color:var(--pink-d)" onclick="openCmp()">📊 Müqayisə et</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="nt" onclick="setDay(0)" id="db0">Gün A — döş/triceps</button>
+      <button class="nt" onclick="setDay(1)" id="db1">Gün B — arxa/biceps</button>
+      <button class="nt" onclick="setDay(2)" id="db2">Gün C — çiyin/abs</button>
+    </div>
+    <div id="dayplan"></div>
+
+    <div class="stl">Kardio</div>
+    <div class="cardio-btns">
+      <button class="cb" id="cw" onclick="selCardio('walk')">
+        <svg viewBox="0 0 24 24"><path d="M13 4a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/><path d="m7 20 2-5 3 2 2-7"/><path d="m6 9 1-2 5 1 3-2"/></svg>
+        Gəzmək
+      </button>
+      <button class="cb" id="cs" onclick="selCardio('swim')">
+        <svg viewBox="0 0 24 24"><path d="M2 12h20M2 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><circle cx="16" cy="7" r="1"/><path d="m14 7-4 5 3 1-2 3"/></svg>
+        Üzmək
+      </button>
+      <button class="cb" id="cr" onclick="selCardio('run')">
+        <svg viewBox="0 0 24 24"><path d="M3 18c3-2 5-2 8 0s5 2 8 0"/><circle cx="15" cy="5" r="1.5"/><path d="m13 7-2 5 4 1-2 4"/><path d="m10 12-3 2"/></svg>
+        Qaçış
+      </button>
+      <button class="cb" id="cb2" onclick="selCardio('bike')">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="15" r="3"/><circle cx="18" cy="15" r="3"/><path d="M6 15 9 6h6l3 9"/><path d="M9 6h3l2-3"/></svg>
+        Velosiped
+      </button>
+    </div>
+    <div id="cardio-ext" style="display:none">
+      <div class="dur-row">
+        <label>Müddət</label>
+        <input type="range" min="5" max="120" step="5" value="30" id="cdur" oninput="document.getElementById('cdurv').textContent=this.value+' dəq';updateCardioPreview()">
+        <span id="cdurv">30 dəq</span>
+      </div>
+      <div class="dur-row" id="cspeed-row" style="display:none">
+        <label>Sürət</label>
+        <input type="range" min="2" max="22" step="0.5" value="8" id="cspeed" oninput="onCardioSpeedInput()">
+        <span id="cspeedv">8 km/saat</span>
+      </div>
+      <div class="dur-row" id="cincline-row" style="display:none">
+        <label>Maillik</label>
+        <input type="range" min="0" max="15" step="0.5" value="0" id="cincline" oninput="document.getElementById('cinclinev').textContent=this.value+'%'">
+        <span id="cinclinev">0%</span>
+      </div>
+      <div class="dur-row" id="ckcal-preview" style="display:none;justify-content:flex-end;margin-bottom:.4rem">
+        <span style="font-size:12px;color:var(--text2)">Təxmini: <strong id="ckcalv" style="color:var(--pink-d)">0 kkal</strong></span>
+      </div>
+      <button class="btn" onclick="logCardio()" style="margin-bottom:1rem">✓ Qeyd et</button>
+    </div>
+    <div class="elist" id="cl"></div>
+  </div>
+
+  <!-- ═══ QİDA ═══ -->
+  <div class="sec" id="s-food">
+    <!-- Yuxu tracker -->
+    <div class="sleep-card">
+      <div class="prot-head">
+        <span class="prot-title">😴 Yuxu Tracker</span>
+        <span id="sleep-today" style="font-size:12px;color:var(--pink);font-weight:700"></span>
+      </div>
+      <div class="sleep-row">
+        <label>Bu gecə yatdığım</label>
+        <input type="range" min="0" max="12" step="0.5" value="7" id="sleep-input" oninput="document.getElementById('sleep-val').textContent=this.value+' saat'">
+        <span id="sleep-val">7 saat</span>
+      </div>
+      <button class="btn btn-pink" onclick="addSleep()" style="width:100%;margin-bottom:.5rem">+ Qeyd et</button>
+      <div class="sleep-hist" id="sleep-hist"></div>
+      <div class="sleep-corr" id="sleep-corr"></div>
+    </div>
+
+    <!-- Protein skalası -->
+    <div class="prot-card">
+      <div class="prot-head">
+        <span class="prot-title">🥩 Günlük Protein Hədəfi</span>
+        <span id="prot-pct" style="font-size:12px;color:var(--pink);font-weight:700"></span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span class="prot-goal" id="prot-goal">—</span>
+        <span style="font-size:12px;color:var(--text2)">q / gün</span>
+        <span id="prot-formula" style="font-size:11px;color:var(--rose);margin-left:auto"></span>
+      </div>
+      <div class="prot-track"><div class="prot-fill" id="prot-fill" style="width:0%"></div></div>
+      <div class="prot-labels"><span>0 q</span><span id="prot-max">—</span></div>
+      <div class="prot-status" id="prot-status">Çəkinizi İdman bölməsindən qeyd edin</div>
+    </div>
+
+    <!-- Günlük xülasə -->
+    <div class="nutr-sumrow">
+      <div class="nutr-sum">
+        <div class="nutr-sum-l">🔥 Bu günün kalorisi</div>
+        <div class="nutr-sum-v" id="today-kcal">0</div>
+        <div class="nutr-sum-u">kkal</div>
+      </div>
+      <div class="nutr-sum mauve">
+        <div class="nutr-sum-l">🥩 Bu günün proteini</div>
+        <div class="nutr-sum-v" id="today-prot">0</div>
+        <div class="nutr-sum-u">qram</div>
+      </div>
+    </div>
+
+    <!-- Ay müqayisəsi: kalori/protein -->
+    <div class="stl">📆 Bu ay vs keçən ay</div>
+    <div class="cmp-card" id="food-month-compare"></div>
+
+    <!-- Həftəlik qrafik -->
+    <div class="chart-card">
+      <div class="chart-card-t">📊 Həftəlik kalori / protein</div>
+      <canvas id="week-chart" height="140"></canvas>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background:var(--pink)"></span>Kalori (kkal/10)</span>
+        <span><span class="legend-dot" style="background:var(--rose)"></span>Protein (q)</span>
+      </div>
+    </div>
+
+    <!-- Şəkildən Qida Analizi (OCR) -->
+    <div class="stl">📷 Qablaşdırmanın şəklini çək (avtomatik oxu)</div>
+    <div class="prot-card" style="margin-bottom:1.2rem">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:.6rem">Qida dəyərləri cədvəlinin (Enerji/Kalori, Protein) şəklini yükləyin — kalori və protein avtomatik seçilib aşağıdakı sahələrə yazılacaq. <strong>Qeyd:</strong> etiketdəki dəyərlər adətən 100 qram üçündür; şəkil oxunandan sonra aşağıda neçə qram yediyinizi yazsanız, kalori/protein ona uyğun avtomatik hesablanacaq.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="file" accept="image/*" id="nf-ocr-file" style="flex:1;min-width:160px;font-size:12px" onchange="runNutritionOcr(this.files[0])">
+        <span id="nf-ocr-status" style="font-size:12px;color:var(--text2)"></span>
+      </div>
+      <div id="nf-grams-row" style="display:none;align-items:center;gap:8px;margin-top:.7rem;padding-top:.7rem;border-top:0.5px solid var(--border2);flex-wrap:wrap">
+        <label style="font-size:12px;color:var(--text2);white-space:nowrap">📏 Neçə qram yediniz?</label>
+        <input type="number" id="nf-grams" value="100" min="0" step="1" oninput="applyGramsScale()" style="width:90px;font-size:13px;padding:6px 9px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none">
+        <span id="nf-grams-base" style="font-size:11px;color:var(--text3)"></span>
+      </div>
+    </div>
+
+    <!-- Əl ilə giriş -->
+    <div class="stl">Günlük qida qeyd et</div>
+
+    <div class="nutr-row">
+      <div class="nutr-field">
+        <label>Yemək adı</label>
+        <input type="text" id="nf-name" placeholder="Toyuq döş, yumurta...">
+      </div>
+      <div class="nutr-field">
+        <label>Kalori (kkal)</label>
+        <input type="number" id="nf-kcal" placeholder="350">
+      </div>
+      <div class="nutr-field">
+        <label>Protein (q)</label>
+        <input type="number" id="nf-prot" placeholder="30">
+      </div>
+      <button class="btn btn-pink" onclick="addNutrition()" style="padding:8px 13px;white-space:nowrap">+ Əlavə</button>
+    </div>
+
+    <div class="stl">Bütün qida qeydləri</div>
+    <div class="elist" id="foodlist"></div>
+  </div>
+
+  <!-- ═══ MEDİA ═══ -->
+  <div class="sec" id="s-media">
+    <div class="mrow" id="mm"></div>
+    <div class="media-tabs">
+      <button class="mtab on" onclick="switchMediaTab('film',event)">🎬 Film</button>
+      <button class="mtab" onclick="switchMediaTab('serial',event)">📺 Serial</button>
+      <button class="mtab" onclick="switchMediaTab('kitab',event)">📚 Kitab</button>
+    </div>
+    <div id="lb-section" style="display:none"></div>
+    <div class="stl" id="media-add-title">Film əlavə et</div>
+    <div class="abar">
+      <input id="mi" placeholder="Ad">
+      <select id="mst">
+        <option value="planım">Planım var</option>
+        <option value="izləyirəm">İzləyirəm</option>
+        <option value="bitirdim">Bitirdim</option>
+      </select>
+      <button onclick="addMedia()">+ Əlavə et</button>
+    </div>
+    <div id="author-row" style="display:none;margin-bottom:.75rem;">
+      <input id="mauthor" placeholder="Müəllif adı" style="width:100%;font-size:13px;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;">
+    </div>
+    <div id="imdb-row" style="margin-bottom:.75rem;display:flex;gap:6px">
+      <input id="mimdb" placeholder="IMDb reytinqi (boş saxlasan, OMDb API-dən avtomatik tapılacaq)" style="flex:1;font-size:13px;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;">
+      <button onclick="changeOmdbKey()" title="OMDb API açarını dəyiş/təyin et" style="padding:8px 11px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;font-size:13px">🔑</button>
+    </div>
+    <div style="margin-bottom:.6rem">
+      <input id="media-search" placeholder="🔍 Axtar (səhv yazsan belə tapacaq)..." oninput="renderMedia()" style="width:100%;font-size:13px;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none">
+    </div>
+    <div class="kanban-drophint">👆 Kartı sürüşdürüb başqa sütuna atsan statusu dəyişəcək</div>
+    <div class="media-kanban" id="ml">
+      <div class="kanban-col" data-status="planım">
+        <div class="kanban-col-head"><span>📌 Planım var</span><span class="kanban-count" id="kc-planım">0</span></div>
+        <div class="kanban-list" id="kl-planım"></div>
+      </div>
+      <div class="kanban-col" data-status="izləyirəm">
+        <div class="kanban-col-head"><span>👀 İzləyirəm</span><span class="kanban-count" id="kc-izləyirəm">0</span></div>
+        <div class="kanban-list" id="kl-izləyirəm"></div>
+      </div>
+      <div class="kanban-col" data-status="bitirdim">
+        <div class="kanban-col-head"><span>✅ Tamamlandı</span><span class="kanban-count" id="kc-bitirdim">0</span></div>
+        <div class="kanban-list" id="kl-bitirdim"></div>
+      </div>
+    </div>
+
+    <!-- Toplu əlavə -->
+    <div class="stl">Toplu əlavə et (hər sətirdə bir ad)</div>
+    <textarea id="bulk-input" placeholder="Məs:&#10;Oppenheimer&#10;Dune Part Two&#10;The Bear" style="width:100%;min-height:90px;font-size:13px;padding:10px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;resize:vertical;font-family:inherit"></textarea>
+    <div class="abar">
+      <select id="bulk-status">
+        <option value="planım">Planım var</option>
+        <option value="izləyirəm">İzləyirəm</option>
+        <option value="bitirdim">Bitirdim</option>
+      </select>
+      <button onclick="addMediaBulk()">+ Hamısını əlavə et</button>
+    </div>
+  </div>
+
+  <!-- ═══ MALİYYƏ ═══ -->
+  <div class="sec" id="s-fin">
+    <div class="kapital-card" id="kapital-card">
+      <div class="kapital-label">Ümumi Kapital</div>
+      <div class="kapital-total" id="kap-total">0 ₼</div>
+      <div class="kapital-sub">Pulum + Borc alacaqlar + İnvestisiya</div>
+      <div class="kapital-breakdown">
+        <div class="kap-item"><label>💰 Pulum</label><div class="kv" id="kap-pul">0 ₼</div></div>
+        <div class="kap-item"><label>📈 İnv.</label><div class="kv" id="kap-inv">0 ₼</div></div>
+        <div class="kap-item"><label>💹 İnv. Artımı</label><div class="kv" id="kap-invgel">0 ₼</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button onclick="exportFinPdf()" style="flex:1;padding:9px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-weight:600;font-size:12px;cursor:pointer">📄 PDF kimi yüklə</button>
+        <button onclick="exportFinExcel()" style="flex:1;padding:9px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-weight:600;font-size:12px;cursor:pointer">📊 Excel kimi yüklə</button>
+      </div>
+    </div>
+
+    <div class="mrow" id="finm"></div>
+
+    <div class="stl">Ümumi pulum</div>
+    <div class="cash-card-grid">
+      <div class="cash-section">
+        <div class="cash-section-title">💰 Pulum (nağd + kart birlikdə)</div>
+        <div id="pul-list"></div>
+        <div class="cash-row" style="margin-top:8px">
+          <input type="text" inputmode="decimal" id="pul-input" placeholder="Məbləğ (məs: 120+35)" style="flex:1">
+          <button class="cash-add-btn" onclick="addPul()">+ Əlavə</button>
+        </div>
+        <div class="cash-total"><span>Cəmi pulum:</span><strong id="pul-total">0 ₼</strong></div>
+      </div>
+    </div>
+
+    <div class="stl">Aylıq məbləğlər</div>
+    <div class="fin-grid">
+      <div class="fin-field"><label>Əsas gəlir (₼)</label><input type="number" id="finc" value="0" oninput="saveFin();calcFin()"></div>
+      <div class="fin-field"><label>Sabit xərclər (₼)</label><input type="number" id="finx" value="0" oninput="saveFin();calcFin()"></div>
+    </div>
+
+    <!-- Hədəf -->
+    <div class="goal-card">
+      <div class="goal-head">
+        <span class="goal-title">🎯 Kapital hədəfi</span>
+        <span id="goal-pct" style="font-size:12px;color:var(--pink);font-weight:700"></span>
+      </div>
+      <div class="goal-status" id="goal-status">Hədəf qoyulmayıb</div>
+      <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+      <div class="goal-set-row">
+        <input type="text" id="goal-name" placeholder="Hədəf adı (məs: Yığım)">
+        <input type="number" id="goal-amount" placeholder="Məbləğ (₼)" style="max-width:110px">
+        <button class="btn btn-pink" onclick="setGoal()">Təyin et</button>
+      </div>
+    </div>
+
+    <div class="stl">Xərc qeydləri</div>
+    <div class="cmp-card" id="fin-month-compare"></div>
+    <div class="chart-card">
+      <div class="chart-card-t">🥧 Aylıq xərc bölgüsü (kateqoriya)</div>
+      <div class="pie-wrap">
+        <canvas id="exp-pie" width="130" height="130" style="max-width:130px"></canvas>
+        <div class="pie-legend" id="exp-legend"></div>
+      </div>
+    </div>
+
+    <div class="abar">
+      <input id="fni" placeholder="Qeyd (məs: kafe)">
+      <select id="fncat">
+        <option value="yemək">Yemək</option>
+        <option value="nəqliyyat">Nəqliyyat</option>
+        <option value="təhsil">Təhsil</option>
+        <option value="əyləncə">Əyləncə</option>
+        <option value="digər">Digər</option>
+      </select>
+      <input type="text" inputmode="decimal" id="fnam" placeholder="₼ (məs: 15+3)" style="max-width:80px">
+      <button onclick="addFin()">+</button>
+    </div>
+    <div class="elist" id="fnl"></div>
+
+    <div class="stl">Borc verdiklərim</div>
+    <div class="abar">
+      <input id="borc-ad" placeholder="Şəxs adı">
+      <input id="borc-am" type="text" inputmode="decimal" placeholder="Məbləğ (məs: 100+20)" style="max-width:110px">
+      <input id="borc-not" placeholder="Qeyd (könüllü)" style="max-width:130px">
+      <button onclick="addBorc()">+</button>
+    </div>
+    <div id="borclist"></div>
+
+    <div class="stl" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📊 Manual yatırım nəticələri</span>
+    </div>
+    <div class="dcard" style="margin-bottom:1rem">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:.6rem">Səhm, ETF və ya kriptoda etdiyiniz yatırımı əl ilə qeyd edin — qoyduğunuz məbləğ və hazırkı (və ya satış) dəyərinə görə mənfəət/zərər avtomatik hesablanır. Canlı qiymət çəkmir, sırf sizin yazdığınız rəqəmlərlə işləyir.</div>
+      <div class="abar" style="flex-wrap:wrap">
+        <input id="it-name" placeholder="Ad (məs: Bitcoin, AAPL, VOO ETF)" style="min-width:140px">
+        <select id="it-type">
+          <option value="Səhm">Səhm</option>
+          <option value="ETF">ETF</option>
+          <option value="Kripto">Kripto</option>
+        </select>
+        <input type="text" inputmode="decimal" id="it-invested" placeholder="Qoyulan (₼)" style="max-width:100px">
+        <input type="text" inputmode="decimal" id="it-current" placeholder="Hazırkı/satış (₼)" style="max-width:120px">
+        <button onclick="addInvestTrade()">+ Əlavə et</button>
+      </div>
+      <div id="it-summary" style="margin-top:.8rem;font-size:13px;font-weight:600"></div>
+      <div class="elist" id="it-list" style="margin-top:.6rem"></div>
+    </div>
+
+    <div class="stl" style="display:flex;justify-content:space-between;align-items:center">
+      <span>İnvestisiyalar</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="setRates()">✏ Məzənnələr</button>
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="openInvModal()">+ Şirkət əlavə et</button>
+      </div>
+    </div>
+    <div class="chart-card" id="inv-pie-card" style="display:none">
+      <div class="chart-card-t">📊 Portfel bölgüsü (aktiv üzrə)</div>
+      <div class="pie-wrap">
+        <canvas id="inv-pie" width="130" height="130" style="max-width:130px"></canvas>
+        <div class="pie-legend" id="inv-pie-legend"></div>
+      </div>
+    </div>
+    <div id="invlist"></div>
+  </div>
+
+  <!-- ═══ TƏQVİM ═══ -->
+  <div class="sec" id="s-cal">
+    <div class="stl">Bugünkü tapşırıqlar</div>
+    <div class="elist" id="cal-today-list"></div>
+
+    <div class="stl">Aktivlik xəritəsi <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">(calendar-heatmap tərzi, son 14 həftə)</span></div>
+    <div class="dcard" style="overflow-x:auto">
+      <div id="activity-heatmap"></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);margin-top:6px">
+        <span>Az</span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--bg2);display:inline-block"></span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--mauve);display:inline-block"></span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--rose);display:inline-block"></span>
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--pink);display:inline-block"></span>
+        <span>Çox</span>
+      </div>
+    </div>
+
+    <div class="stl">AI qeyd təhlili <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">(Transformers.js, on-device)</span></div>
+    <div class="dcard">
+      <div class="abar" style="margin-bottom:.6rem">
+        <input id="ai-note-input" placeholder="Bugün necə keçdi? Qısa qeyd yazın...">
+        <button id="ai-note-btn" onclick="analyzeNoteSentiment()">🧠 Təhlil et</button>
+      </div>
+      <div id="ai-note-result" style="font-size:12px;color:var(--text2)"></div>
+    </div>
+
+    <div class="stl">📅 Tam təqvim <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">(tui.calendar — sürüşdürüb tarixini dəyişə bilərsiniz)</span></div>
+    <div class="dcard" style="padding:0;overflow:hidden;margin-bottom:1rem">
+      <div id="tui-cal" style="height:520px"></div>
+    </div>
+
+    <div class="stl">Təqvim</div>
+    <div class="cal-nav">
+      <span class="cal-month-label" id="cal-month-label"></span>
+      <div class="cal-nav-btns">
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="calChangeMonth(-1)">←</button>
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="calGoToday()">Bu gün</button>
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="calChangeMonth(1)">→</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+
+    <div class="stl" id="cal-sel-label">Tapşırıq əlavə et</div>
+    <div class="abar">
+      <input id="cal-task-input" placeholder="Nə etməlisən?" onkeydown="if(event.key==='Enter')addCalTask()">
+      <button onclick="addCalTask()">+ Əlavə et</button>
+    </div>
+    <div class="elist" id="cal-sel-list"></div>
+  </div>
+</div>
+
+<!-- Müqayisə Modalı -->
+<div class="modal-bg" id="cmp-modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <h3 style="margin:0">📊 Əvvəlki ilə müqayisə</h3>
+      <span onclick="closeAnimModal('cmp-modal')" style="cursor:pointer;font-size:20px;color:var(--text3)">✕</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="showCmp(0)">Gün A</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="showCmp(1)">Gün B</button>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="showCmp(2)">Gün C</button>
+    </div>
+    <div id="cmp-content"><p class="empty">Gün seçin</p></div>
+  </div>
+</div>
+
+<!-- İnvestisiya Modalı -->
+<div class="modal-bg" id="inv-modal">
+  <div class="modal">
+    <h3>📈 Yeni investisiya</h3>
+    <div style="font-size:12px;margin-bottom:.75rem;background:var(--info-bg);padding:8px 10px;border-radius:8px;color:var(--info-text)">
+      💡 Ticker yazın → real vaxt qiyməti Yahoo Finance-dən çəkilir (API açarı lazım deyil)
+    </div>
+    <div style="position:relative;margin-bottom:.75rem">
+      <input id="inv-query" placeholder="Ticker: AAPL, TSLA, VOO, BTC-USD..." style="width:100%;border-color:var(--pink);margin-bottom:0">
+      <div id="inv-ticker-hint" style="font-size:11px;color:var(--text3);margin-top:4px">Məs: AAPL (Apple), VOO (ETF), BTC-USD (Bitcoin), BIST100.IS (Türkiyə)</div>
+    </div>
+    <input id="inv-amount" type="number" placeholder="Neçə ədəd / vahid aldım (məs: 5)">
+    <input id="inv-buy-price" type="number" placeholder="Alış qiyməti (1 vahid, USD)">
+    <input id="inv-date" type="date" title="Alış tarixi">
+    <div id="inv-search-result" style="display:none;font-size:12px;padding:8px 10px;background:var(--success-bg);color:var(--success-text);border-radius:8px;margin-bottom:.75rem"></div>
+    <div id="inv-search-err" style="display:none;font-size:12px;padding:8px 10px;background:#fde8e8;color:#c0392b;border-radius:8px;margin-bottom:.75rem"></div>
+    <div class="modal-btns">
+      <button onclick="closeInvModal()">Ləğv et</button>
+      <button class="primary" id="inv-search-btn" onclick="yahooSearchInv()">📊 Qiymət çək & Əlavə et</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// API AÇARI — ÖZ AÇARINI BURAYA YAZ
+// ══════════════════════════════════════════
+
+// ── Animate.css: bütün SweetAlert2 pəncərələri üçün axıcı açılış/bağlanış ──
+if(typeof Swal!=='undefined'){
+  window.Swal = Swal.mixin({
+    showClass:{ popup:'animate__animated animate__zoomIn animate__faster' },
+    hideClass:{ popup:'animate__animated animate__zoomOut animate__faster' }
+  });
+}
+
+// ── Animate.css ilə modal aç/bağla (fon + pəncərə üçün axıcı keçid) ──
+function openAnimModal(id){
+  const bg=document.getElementById(id);
+  if(!bg)return;
+  bg.classList.add('open');
+  bg.classList.add('animate__animated','animate__fadeIn','animate__faster');
+  const inner=bg.querySelector('.modal');
+  if(inner){
+    inner.classList.add('animate__animated','animate__zoomIn','animate__faster');
+    inner.addEventListener('animationend',()=>inner.classList.remove('animate__animated','animate__zoomIn','animate__faster'),{once:true});
+  }
+  bg.addEventListener('animationend',()=>bg.classList.remove('animate__animated','animate__fadeIn','animate__faster'),{once:true});
+}
+function closeAnimModal(id){
+  const bg=document.getElementById(id);
+  if(!bg)return;
+  const inner=bg.querySelector('.modal');
+  bg.classList.add('animate__animated','animate__fadeOut','animate__faster');
+  if(inner)inner.classList.add('animate__animated','animate__zoomOut','animate__faster');
+  const done=()=>{
+    bg.classList.remove('open','animate__animated','animate__fadeOut','animate__faster');
+    if(inner)inner.classList.remove('animate__animated','animate__zoomOut','animate__faster');
+  };
+  setTimeout(done,260); // animate__faster ~0.5s-dən qısa ehtiyat fallback
+}
+
+// ── VERİLƏNLƏR ──
+function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function save(k,v){
+  try{localStorage.setItem(k,JSON.stringify(v));}catch{}
+  queueCloudPush();
+  dexieBackup(k,v); // Dexie-ə ehtiyat nüsxə (aşağıda təyin olunur)
+}
+
+// ═══ DEXIE — localStorage-in IndexedDB-də ehtiyat (backup) nüsxəsi ═══
+// Qeyd: bütün oxuma əməliyyatları (load()) hələ də sürətli/sinxron localStorage-dən
+// gedir — bu, kod daxilində minlərlə çağırışı asinxron etmədən əlavə təhlükəsizlik
+// qatı yaratmaq üçündür. Brauzer localStorage-i təmizləsə belə (məs. "Clear browsing
+// data"), IndexedDB adətən ayrıca saxlanılır və bərpa üçün istifadə oluna bilər.
+let dexieDB=null;
+if(typeof Dexie!=='undefined'){
+  try{
+    dexieDB=new Dexie('panelBackupDB');
+    dexieDB.version(1).stores({kv:'key'});
+  }catch(e){console.warn('Dexie başlamadı:',e);}
+}
+function dexieBackup(key,value){
+  if(!dexieDB)return;
+  dexieDB.kv.put({key,value:JSON.stringify(value),updatedAt:Date.now()}).catch(()=>{});
+}
+// Bərpa köməkçisi: konsoldan `restoreFromDexie('borcList')` çağırıb localStorage
+// itəndə/silinəndə IndexedDB-dəki son ehtiyat nüsxəni geri qaytarmaq mümkündür.
+async function restoreFromDexie(key){
+  if(!dexieDB)return null;
+  const row=await dexieDB.kv.get(key);
+  if(!row)return null;
+  const val=JSON.parse(row.value);
+  localStorage.setItem(key,row.value);
+  return val;
+}
+
+// ═══ JSON EKSPORT / İDXAL (tam ehtiyat nüsxə/bərpa) ═══
+function exportAllData(){
+  const snapshot={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k==='syncConfig')continue; // bulud açarını ixrac etmirik (təhlükəsizlik)
+    snapshot[k]=localStorage.getItem(k);
+  }
+  const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`panel-yedek-${getTodayStr().replace(/\./g,'-')}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+  toast('Ehtiyat nüsxə yükləndi');
+}
+
+async function importAllData(file){
+  if(!file)return;
+  const confirm=await Swal.fire({
+    icon:'warning',title:'Diqqət',
+    text:'Bu, cari bütün datanı seçdiyiniz fayldakı data ilə əvəz edəcək. Davam edilsin?',
+    showCancelButton:true,confirmButtonText:'Bəli, əvəz et',cancelButtonText:'Ləğv et',confirmButtonColor:'#7c3aed'
+  });
+  if(!confirm.isConfirmed)return;
+  try{
+    const text=await file.text();
+    const data=JSON.parse(text);
+    Object.keys(data).forEach(k=>{
+      if(k==='syncConfig')return; // bulud tənzimləməsini idxal etmirik
+      localStorage.setItem(k,data[k]);
+    });
+    toast('Data bərpa edildi, səhifə yenilənir...','success');
+    setTimeout(()=>location.reload(),1200);
+  }catch(e){
+    Swal.fire({icon:'error',title:'İdxal alınmadı',text:e.message||'Fayl formatı düzgün deyil.',confirmButtonColor:'#7c3aed'});
+  }
+}
+
+// ═══ PWA "Tətbiqi yüklə" düyməsi ═══
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='inline-flex';
+});
+async function installPwa(){
+  if(!deferredInstallPrompt)return;
+  deferredInstallPrompt.prompt();
+  const {outcome}=await deferredInstallPrompt.userChoice;
+  if(outcome==='accepted')toast('Tətbiq yüklənir...');
+  deferredInstallPrompt=null;
+  document.getElementById('pwa-install-btn').style.display='none';
+}
+window.addEventListener('appinstalled',()=>{
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='none';
+});
+
+// ═══ TOAST BİLDİRİŞLƏR (SweetAlert2) ═══
+function toast(msg,icon){
+  if(typeof Swal==='undefined')return;
+  Swal.mixin({
+    toast:true,position:'top-end',showConfirmButton:false,timer:1600,timerProgressBar:true
+  }).fire({icon:icon||'success',title:msg});
+}
+
+// ═══ SORTABLEJS — siyahıları sürükləyib sıralamaq üçün ümumi köməkçi ═══
+// getArr: cari massivi qaytaran funksiya (məs. ()=>borcList) — massiv yenidən
+// təyin olunsa belə (filter/reassign) həmişə düzgün referensi alır.
+function initSortable(containerId,getArr,saveKey,rerenderFn){
+  const el=document.getElementById(containerId);
+  if(!el||typeof Sortable==='undefined'||el._sortableInit)return;
+  el._sortableInit=true;
+  Sortable.create(el,{
+    animation:150,
+    delay:80,
+    delayOnTouchOnly:true,
+    onEnd:function(evt){
+      if(evt.oldIndex===evt.newIndex)return;
+      const arr=getArr();
+      const item=arr.splice(evt.oldIndex,1)[0];
+      arr.splice(evt.newIndex,0,item);
+      save(saveKey,arr);
+      rerenderFn();
+    }
+  });
+}
+
+// ═══ DAYJS quraşdırma ═══
+// az-AZ formatı olan "DD.MM.YYYY" tarixlərini dəqiq parse etmək üçün.
+if(typeof dayjs!=='undefined' && typeof dayjs_plugin_customParseFormat!=='undefined'){
+  dayjs.extend(dayjs_plugin_customParseFormat);
+}
+if(typeof dayjs!=='undefined' && typeof dayjs_plugin_relativeTime!=='undefined'){
+  dayjs.extend(dayjs_plugin_relativeTime);
+  try{ dayjs.locale('az'); }catch{}
+}
+// "3 gün əvvəl" tərzi nisbi tarix — DD.MM.YYYY formatındakı tarixləri qəbul edir
+function timeAgo(dateStr){
+  if(typeof dayjs==='undefined'||!dateStr)return '';
+  try{
+    const d=dayjs(dateStr,AZ_FMT,true);
+    return d.isValid()?d.fromNow():'';
+  }catch{ return ''; }
+}
+const AZ_FMT='DD.MM.YYYY';
+
+// ═══ BULUD SİNXRONİZASİYASI (Supabase) ═══
+// Fikir: bütün localStorage-i tək bir JSON kimi Supabase-də saxlayırıq.
+// "Sinxronizasiya kodu" bir növ şəxsi parol rolunu oynayır — hər iki cihazda
+// (telefon + PC) eyni kod daxil edilsə, ikisi də eyni buluddakı qeydə baxır.
+let syncConfig = JSON.parse(localStorage.getItem('syncConfig') || 'null');
+let supabaseClient = null;
+let cloudPushTimer = null;
+
+function initSupabase(){
+  if(!syncConfig || typeof window.supabase === 'undefined') return;
+  try{
+    supabaseClient = window.supabase.createClient(syncConfig.url, syncConfig.key);
+  }catch(e){ console.warn('Supabase client yaradılmadı:', e); }
+}
+
+function setSyncStatus(text){
+  const el = document.getElementById('sync-status');
+  if(el) el.textContent = text;
+}
+
+async function setupSync(){
+  const { value: form } = await Swal.fire({
+    title: '☁️ Bulud Sinxronizasiyası',
+    html: `
+      <div style="text-align:left;font-size:12px;display:flex;flex-direction:column;gap:8px">
+        <p style="font-size:11px;color:#888;margin-bottom:4px">Supabase.com-da pulsuz layihə yaradın, "Project URL" və "anon public key" dəyərlərini buraya yapışdırın. Aşağıdakı SQL-i də Supabase-in SQL Editor-ında BİR DƏFƏ işə salın (növbəti mesajda göndərəcəm).</p>
+        <label>Supabase Project URL<input id="sy-url" class="swal2-input" placeholder="https://xxxx.supabase.co" value="${syncConfig?.url||''}" style="margin:2px 0"></label>
+        <label>Supabase anon public key<input id="sy-key" class="swal2-input" placeholder="eyJhbGciOi..." value="${syncConfig?.key||''}" style="margin:2px 0"></label>
+        <label>Sinxronizasiya kodu (özünüz uydurun — hər iki cihazda EYNİ olmalıdır)<input id="sy-code" class="swal2-input" placeholder="mənim-gizli-kodum-123" value="${syncConfig?.syncKey||''}" style="margin:2px 0"></label>
+      </div>`,
+    focusConfirm: false,
+    showCancelButton: true,
+    showDenyButton: !!syncConfig,
+    denyButtonText: 'Sinxronizasiyanı ləğv et',
+    confirmButtonText: 'Yadda saxla və sinxronlaşdır',
+    cancelButtonText: 'Bağla',
+    confirmButtonColor: '#7c3aed',
+    width: 480,
+    preConfirm: () => ({
+      url: document.getElementById('sy-url').value.trim(),
+      key: document.getElementById('sy-key').value.trim(),
+      syncKey: document.getElementById('sy-code').value.trim()
+    })
+  });
+
+  if (form === false) { // "Sinxronizasiyanı ləğv et" basıldı
+    localStorage.removeItem('syncConfig');
+    syncConfig = null; supabaseClient = null;
+    setSyncStatus('');
+    Swal.fire({icon:'success',title:'Sinxronizasiya ləğv edildi',timer:1200,showConfirmButton:false});
+    return;
+  }
+  if (!form || !form.url || !form.key || !form.syncKey) return;
+
+  syncConfig = form;
+  localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+  initSupabase();
+  setSyncStatus('⏳ Sinxronlaşır...');
+  const ok = await pullFromCloud(true);
+  await pushToCloud();
+  setSyncStatus('✅ Sinxron');
+  Swal.fire({
+    icon:'success',
+    title:'Sinxronizasiya quruldu!',
+    text:'İndi digər cihazda (telefon/PC) da eyni URL, açar və kodu daxil edin.',
+    confirmButtonColor:'#7c3aed'
+  });
+}
+
+function queueCloudPush(){
+  if(!syncConfig) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(pushToCloud, 1500);
+}
+
+async function pushToCloud(){
+  if(!supabaseClient || !syncConfig) return;
+  const snapshot = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k === 'syncConfig') continue;
+    snapshot[k] = localStorage.getItem(k);
+  }
+  try{
+    setSyncStatus('⏳ Göndərilir...');
+    const { error } = await supabaseClient.from('panel_sync').upsert({
+      sync_key: syncConfig.syncKey,
+      data: snapshot,
+      updated_at: new Date().toISOString()
+    });
+    if(error) throw error;
+    setSyncStatus('✅ Sinxron');
+  }catch(e){
+    console.warn('Cloud push xətası:', e);
+    setSyncStatus('⚠ Xəta');
+  }
+}
+
+// silent=true olduqda uğursuzluqda dialoq göstərmir (səhifə açılışında istifadə üçün)
+async function pullFromCloud(silent){
+  if(!supabaseClient || !syncConfig) return false;
+  try{
+    setSyncStatus('⏳ Yoxlanılır...');
+    const { data, error } = await supabaseClient
+      .from('panel_sync').select('data,updated_at')
+      .eq('sync_key', syncConfig.syncKey).maybeSingle();
+    if(error) throw error;
+    if(data && data.data){
+      Object.keys(data.data).forEach(k=>{
+        if(k !== 'syncConfig') localStorage.setItem(k, data.data[k]);
+      });
+      setSyncStatus('✅ Sinxron');
+      return true;
+    }
+    setSyncStatus('✅ Sinxron (ilk dəfə)');
+    return false;
+  }catch(e){
+    console.warn('Cloud pull xətası:', e);
+    setSyncStatus('⚠ Xəta');
+    if(!silent) Swal.fire({icon:'error',title:'Bağlantı xətası',text:e.message||'Yoxlayın: URL/açar düzgündürmü, SQL cədvəli yaradılıbmı.',confirmButtonColor:'#7c3aed'});
+    return false;
+  }
+}
+
+async function manualPull(){
+  const changed = await pullFromCloud(false);
+  if(changed) location.reload();
+}
+
+// ═══ SKELETON LOADING ═══
+function showSkeleton(){
+  const el=document.getElementById('skeleton-overlay');
+  if(el)el.style.display='flex';
+}
+function hideSkeleton(){
+  const el=document.getElementById('skeleton-overlay');
+  if(el)el.style.display='none';
+}
+
+// Səhifə ilk açılanda: konfiqurasiya varsa, buluddan çəkib təzədirsə yenilə.
+// sessionStorage bayrağı ilə eyni tab-da sonsuz reload dövrü qarşısı alınır.
+(function cloudSyncBootstrap(){
+  if(!syncConfig) return;
+  initSupabase();
+  setSyncStatus('⏳ Sinxronlaşır...');
+  if(sessionStorage.getItem('cloudSyncedOnce')) return;
+  sessionStorage.setItem('cloudSyncedOnce','1');
+  showSkeleton();
+  setTimeout(hideSkeleton,8000); // fallback: bağlantı asılı qalarsa 8 saniyədən sonra hər halda gizlət
+  pullFromCloud(true).then(changed=>{
+    if(changed) location.reload();
+    else hideSkeleton();
+  }).catch(()=>hideSkeleton());
+})();
+
+// mathjs ilə "məbləğ" sahələrində ifadə dəstəyi: "120+35*2" kimi yazılışlara icazə verir.
+// Sadə rəqəm daxil edilibsə, adi parseFloat kimi işləyir; xəta olarsa NaN qaytarır.
+function parseAmount(str){
+  if(str==null||str==='')return NaN;
+  if(typeof math!=='undefined'){
+    try{
+      const r=math.evaluate(String(str));
+      const n=typeof r==='object'&&r!=null&&'toNumber' in r?r.toNumber():Number(r);
+      if(!isNaN(n))return n;
+    }catch(e){/* ifadə deyil, adi ədəd kimi cəhd et */}
+  }
+  return parseFloat(str);
+}
+
+let fitSets   = load('fitSets',{});
+let fitLogs   = load('fitLogs',[]);
+let weightLog = load('weightLog',[]);    // [{kg,date,ts}]
+let exW       = load('exW',{});          // {"d-m_kg":20, "d-m_san":45}
+let nutrLogs  = load('nutrLogs',[]);     // [{name,kcal,prot,date}]
+let mediaList = load('mediaList',[]);
+let _mediaIdSeq=0;
+function genMediaId(){return Date.now()+'_'+(_mediaIdSeq++);}
+mediaList.forEach(e=>{ if(!e.id) e.id=genMediaId(); });
+let finLogs   = load('finLogs',[]);
+let borcList  = load('borcList',[]);
+let invList   = load('invList',[]);
+let investTrades = load('investTrades',[]); // [{name,type,invested,current,date,ts}] — manual səhm/ETF/kripto qeydi
+let pulList = load('pulList', null);
+if(pulList===null){
+  // Köhnə "Nağd" + "Kart" siyahılarını bir dəfəlik "Ümumi pulum" siyahısında birləşdiririk.
+  const _oldNagd = load('nagdList',[]);
+  const _oldKart = load('kartList',[]);
+  pulList = [
+    ..._oldNagd.map(n=>({id:n.id||Date.now()+Math.random(),amount:n.amount||0,date:n.date})),
+    ..._oldKart.map(k=>({id:k.id||Date.now()+Math.random(),amount:k.amount||0,date:k.date,label:k.name||''}))
+  ];
+  save('pulList',pulList);
+}
+
+const DAY_PLANS = [
+  {name:'Gün A — döş / triceps', moves:[
+    {n:'Incline bench press',type:'kg'},
+    {n:'Dumbbell bench press',type:'kg'},
+    {n:'Cable overhead extension',type:'kg'},
+    {n:'Dumbbell chest fly',type:'kg'},
+    {n:'Triceps pushdown',type:'kg'}
+  ]},
+  {name:'Gün B — arxa / biceps', moves:[
+    {n:'Lat pulldown (wide grip)',type:'kg'},
+    {n:'Seated cable row',type:'kg'},
+    {n:'Cable face pull',type:'kg'},
+    {n:'Single arm dumbbell preacher curl',type:'kg'}
+  ]},
+  {name:'Gün C — çiyin / abs', moves:[
+    {n:'Ab rollout',type:'san'},
+    {n:'Smith machine shrug',type:'kg'},
+    {n:'Cable lateral raise',type:'kg'},
+    {n:'Seated dumbbell shoulder press',type:'kg'},
+    {n:'Plank',type:'san'}
+  ]}
+];
+
+document.getElementById('dts').textContent = new Date().toLocaleDateString('az-AZ',{day:'2-digit',month:'long',year:'numeric'});
+
+let _lastSecName='fit';
+const SEC_ORDER=['fit','food','media','fin','cal'];
+window.SEC_ORDER=SEC_ORDER;
+window._lastSecName=_lastSecName;
+function sw(name){
+  SEC_ORDER.forEach((n,i)=>{
+    document.querySelectorAll('.nt')[i].classList.toggle('on',n===name);
+  });
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on','animate__animated','animate__slideInRight','animate__slideInLeft','animate__faster'));
+  const target=document.getElementById('s-'+name);
+  target.classList.add('on');
+  {
+    const oldIdx=SEC_ORDER.indexOf(_lastSecName);
+    const newIdx=SEC_ORDER.indexOf(name);
+    const dir=newIdx>=oldIdx?'animate__slideInRight':'animate__slideInLeft';
+    target.classList.add('animate__animated',dir,'animate__faster');
+    target.addEventListener('animationend',()=>target.classList.remove('animate__animated',dir,'animate__faster'),{once:true});
+  }
+  _lastSecName=name;
+  window._lastSecName=name;
+  if(name==='fin'){loadFin();calcFin();renderBorcList();renderInvList();renderPulList();renderInvestTrades();}
+  if(name==='fit'){renderFitMetrics();renderWeightCard();}
+  if(name==='food'){renderProteinScale();renderFood();renderSleep();renderWeekChart();}
+  if(name==='media'){renderMediaMetrics();renderMedia();}
+  if(name==='cal'){renderCalGrid();renderCalSelList();renderCalToday();renderActivityHeatmap();setTimeout(()=>{initTuiCalendarIfNeeded();if(tuiCalendarInstance)tuiCalendarInstance.render();},30);}
+  if(typeof uiState!=='undefined'){ uiState.activeSection=name; uiState.lastAction=new Date().toISOString(); }
+}
+
+// ═══ BƏDƏN ÇƏKİSİ ═══
+function addWeight(){
+  const v=parseFloat(document.getElementById('wt-input').value);
+  if(!v||v<30||v>250)return;
+  weightLog.unshift({kg:v,date:new Date().toLocaleDateString('az-AZ'),ts:Date.now()});
+  document.getElementById('wt-input').value='';
+  save('weightLog',weightLog);
+  renderWeightCard();
+  renderProteinScale();
+  toast(v+' kq qeyd edildi');
+}
+
+function renderWeightCard(){
+  const latest=weightLog[0];
+  const prev=weightLog[1];
+  const elV=document.getElementById('wh-val');
+  const elD=document.getElementById('wh-delta');
+  const elH=document.getElementById('wh-hist');
+  if(!elV)return;
+  if(latest){
+    elV.textContent=latest.kg.toFixed(1);
+    if(prev){
+      const d=(latest.kg-prev.kg);
+      const sign=d>0?'▲ +':d<0?'▼ ':'= ';
+      const ago=timeAgo(prev.date);
+      elD.textContent=sign+Math.abs(d).toFixed(1)+' kq ('+prev.date+(ago?', '+ago:'')+')';
+    } else { elD.textContent=latest.date+(timeAgo(latest.date)?' — '+timeAgo(latest.date):''); }
+  } else { elV.textContent='—'; elD.textContent='Hələ qeyd yoxdur'; }
+  if(elH) elH.innerHTML=weightLog.slice(0,6).reverse().map(w=>`<span class="wh-dot">${w.kg}</span>`).join('');
+  renderWeightTrendChart();
+}
+
+let weightTrendChartInstance=null; // Chart.js instansı
+
+function renderWeightTrendChart(){
+  const el=document.getElementById('weight-trend-chart');
+  if(!el)return;
+  if(weightTrendChartInstance){weightTrendChartInstance.destroy();weightTrendChartInstance=null;}
+  if(typeof Chart==='undefined')return;
+  const last=weightLog.slice(0,20).reverse(); // son 20 qeyd, xronoloji sırayla
+  if(last.length<2){el.style.display='none';return;}
+  el.style.display='';
+  weightTrendChartInstance=new Chart(el,{
+    type:'line',
+    data:{
+      labels:last.map(w=>w.date),
+      datasets:[{
+        data:last.map(w=>w.kg),
+        borderColor:'#ffffff',
+        backgroundColor:'rgba(255,255,255,0.15)',
+        fill:true,
+        tension:0.35,
+        pointRadius:2,
+        pointBackgroundColor:'#ffffff'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        x:{display:false},
+        y:{display:false}
+      },
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y+' kq'}}}
+    }
+  });
+}
+
+// ═══ İDMAN ═══
+function setDay(dayIdx){
+  document.querySelectorAll('[id^=db]').forEach((b,j)=>b.classList.toggle('on',j===dayIdx));
+  const plan=DAY_PLANS[dayIdx];
+  const sets=fitSets[dayIdx]||{};
+  const snap=load('snap_'+dayIdx,null); // öncəki snapshot
+
+  let html=`<div class="dcard"><div class="dcard-hd"><span class="dcard-t">${plan.name}</span></div>`;
+  plan.moves.forEach((mv,mi)=>{
+    const k=`${dayIdx}-${mi}`;
+    const done=sets[k]||false;
+    const sv=sets[k+'_s']||3;
+    const rv=sets[k+'_r']||10;
+    const isKg=mv.type==='kg';
+    const curW=exW[k+'_'+mv.type]||'';
+
+    // Müqayisə
+    let cmpHtml='';
+    if(snap&&snap[mi]){
+      const prevW=snap[mi].w||0;
+      const cur=parseFloat(curW)||0;
+      if(prevW&&cur){
+        const diff=cur-prevW;
+        const cls=diff>0?'up':diff<0?'dn':'eq';
+        const sign=diff>0?'+':'';
+        const unit=isKg?'kq':'san';
+        cmpHtml=`<div class="ex-cmp ${cls}">${diff>0?'↑':diff<0?'↓':'='} ${sign}${diff.toFixed(1)} ${unit} (əvvəlki: ${prevW}${unit})</div>`;
+      }
+    }
+
+    html+=`<div class="exrow">
+      <div class="exname-wrap">
+        <div class="exname">${mv.n}</div>
+        ${cmpHtml}
+      </div>
+      <div class="exset">
+        <input type="number" min="1" max="20" value="${sv}" onchange="setSets(${dayIdx},${mi},'s',this.value)" title="Set sayı">
+        <span>×</span>
+        <input type="number" min="1" max="200" value="${rv}" onchange="setSets(${dayIdx},${mi},'r',this.value)" title="Təkrar">
+        <span>${isKg?'tkr':'—'}</span>
+        ${isKg
+          ?`<input class="inp-kg" type="number" min="0" max="400" step="0.5" value="${curW}" placeholder="kq" onchange="saveExW(${dayIdx},${mi},'kg',this.value)" title="İstifadə etdiyiniz çəki"><span class="lbl-kg">kq</span>`
+          :`<input class="inp-time" type="number" min="0" max="600" value="${curW}" placeholder="san" onchange="saveExW(${dayIdx},${mi},'san',this.value)" title="Vaxt (saniyə)"><span class="lbl-san">san</span>`
+        }
+      </div>
+      <input type="checkbox" class="exck" ${done?'checked':''} onchange="toggleEx(${dayIdx},${mi},this.checked)">
+    </div>`;
+  });
+  html+=`</div>`;
+
+  const total=plan.moves.length;
+  const done2=Object.keys(sets).filter(k=>k.match(/^\d+-\d+$/)&&sets[k]).length;
+  const pct=total?Math.round(done2/total*100):0;
+  html+=`<div class="pb"><div class="pbi" style="width:${pct}%"></div></div>
+         <div class="prog-txt">${done2}/${total} hərəkət tamamlandı — ${pct}%</div>`;
+
+  if(done2===total&&total>0) saveSnapshot(dayIdx);
+  document.getElementById('dayplan').innerHTML=html;
+  renderFitMetrics();
+}
+
+function setSets(day,mi,type,val){
+  if(!fitSets[day])fitSets[day]={};
+  fitSets[day][`${day}-${mi}_${type}`]=parseInt(val)||0;
+  save('fitSets',fitSets);
+}
+
+function saveExW(day,mi,type,val){
+  exW[`${day}-${mi}_${type}`]=parseFloat(val)||0;
+  save('exW',exW);
+}
+
+function toggleEx(day,mi,checked){
+  if(!fitSets[day])fitSets[day]={};
+  fitSets[day][`${day}-${mi}`]=checked;
+  save('fitSets',fitSets);
+  setDay(day);
+  if(checked){
+    // Yalnız işarələnən sətirdə kiçik "təbrik" animasiyası
+    const rows=document.querySelectorAll('#dayplan .exrow');
+    const row=rows[mi];
+    if(row){
+      row.classList.add('animate__animated','animate__pulse','animate__faster');
+      row.addEventListener('animationend',()=>row.classList.remove('animate__animated','animate__pulse','animate__faster'),{once:true});
+    }
+    // Günün BÜTÜN hərəkətləri tamamlananda böyük təbrik pəncərəsi
+    const plan=DAY_PLANS[day];
+    const sets=fitSets[day];
+    const doneCount=plan.moves.filter((_,idx)=>sets[`${day}-${idx}`]).length;
+    if(doneCount===plan.moves.length) celebrateDayDone(plan.name);
+  }
+}
+
+function celebrateDayDone(planName){
+  if(typeof Swal==='undefined')return;
+  Swal.fire({
+    icon:'success',
+    title:'🎉 Təbriklər!',
+    html:`<b>${planName}</b> tam tamamlandı!`,
+    confirmButtonColor:'#7c3aed',
+    showClass:{popup:'animate__animated animate__bounceIn animate__faster'},
+    hideClass:{popup:'animate__animated animate__bounceOut animate__faster'}
+  });
+}
+
+function saveSnapshot(dayIdx){
+  const plan=DAY_PLANS[dayIdx];
+  const snap={};
+  plan.moves.forEach((mv,mi)=>{
+    const k=`${dayIdx}-${mi}_${mv.type}`;
+    snap[mi]={n:mv.n,w:exW[k]||0,type:mv.type,date:new Date().toLocaleDateString('az-AZ')};
+  });
+  save('snap_'+dayIdx,snap);
+}
+
+function openCmp(){openAnimModal('cmp-modal');showCmp(0);}
+
+function showCmp(dayIdx){
+  const plan=DAY_PLANS[dayIdx];
+  const snap=load('snap_'+dayIdx,null);
+  if(!snap){
+    document.getElementById('cmp-content').innerHTML='<p class="empty">Bu gün üçün əvvəlki qeyd yoxdur. Bütün hərəkətlər tamamlananda avtomatik yadda saxlanır.</p>';
+    return;
+  }
+  let html=`<div style="font-size:11px;color:var(--text2);margin-bottom:.6rem">Son qeyd: ${snap[0]?.date||'—'} · <strong>${plan.name}</strong></div>`;
+  html+=plan.moves.map((mv,mi)=>{
+    const s=snap[mi]||{};
+    const prevW=s.w||0;
+    const curW=exW[`${dayIdx}-${mi}_${mv.type}`]||0;
+    const unit=mv.type==='kg'?'kq':'san';
+    const diff=curW-prevW;
+    let deltaHtml='';
+    if(prevW){
+      const cls=diff>0?'up':diff<0?'dn':'eq';
+      const sign=diff>0?'+':'';
+      deltaHtml=`<span class="cmp-delta ${cls}">${sign}${diff.toFixed(1)} ${unit}</span>`;
+    }
+    return `<div class="cmp-row">
+      <span style="color:var(--text2);font-size:12px">${mv.n}</span>
+      <div class="cmp-vals">
+        <span class="cmp-prev">${prevW||'—'} ${unit}</span>
+        <span style="color:var(--text3)">→</span>
+        <span class="cmp-now">${curW||'—'} ${unit}</span>
+        ${deltaHtml}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('cmp-content').innerHTML=html;
+}
+
+function renderFitMetrics(){
+  const cardioCount=fitLogs.filter(e=>e.type==='kardio').length;
+  const daysLogged=Object.keys(fitSets).length;
+  const latestKg=weightLog[0]?.kg;
+  const today=new Date().toLocaleDateString('az-AZ');
+  const kcalToday=fitLogs.filter(e=>e.type==='kardio'&&e.date===today).reduce((s,e)=>s+(e.kcal||0),0);
+  document.getElementById('fm').innerHTML=`
+    <div class="mc"><div class="mc-l">Trenirovka günü</div><div class="mc-v" style="color:var(--pink)">${daysLogged}</div></div>
+    <div class="mc"><div class="mc-l">Kardio seansı</div><div class="mc-v">${cardioCount}</div></div>
+    ${latestKg?`<div class="mc"><div class="mc-l">Bədən çəkim</div><div class="mc-v" style="color:var(--pink)">${latestKg.toFixed(1)} kq</div></div>`:''}
+    ${kcalToday?`<div class="mc"><div class="mc-l">🔥 Bu gün yandırılan</div><div class="mc-v" style="color:var(--pink)">${kcalToday} kkal</div></div>`:''}`;
+}
+
+let cardioSel=null;
+function selCardio(type){
+  cardioSel=type;
+  ['cw','cs','cr','cb2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
+  const map={walk:'cw',swim:'cs',run:'cr',bike:'cb2'};
+  if(map[type])document.getElementById(map[type]).classList.add('sel');
+  document.getElementById('cardio-ext').style.display='block';
+
+  // Sürət/maillik yalnız trenajorda mənalı olan növlər üçün göstərilir
+  const showSpeed=(type==='run'||type==='walk'||type==='bike');
+  document.getElementById('cspeed-row').style.display=showSpeed?'flex':'none';
+  document.getElementById('cincline-row').style.display=(type==='run'||type==='walk')?'flex':'none';
+  document.getElementById('ckcal-preview').style.display=showSpeed?'flex':'none';
+
+  // Növə görə sürət slider-inin uyğun aralığını və default dəyərini tənzimlə
+  const speedEl=document.getElementById('cspeed');
+  const ranges={run:{min:4,max:22,step:0.5,def:8},walk:{min:2,max:7,step:0.5,def:5},bike:{min:8,max:40,step:1,def:18}};
+  if(ranges[type]){
+    speedEl.min=ranges[type].min;speedEl.max=ranges[type].max;speedEl.step=ranges[type].step;
+    if(speedEl.value<ranges[type].min||speedEl.value>ranges[type].max||!speedEl.dataset.touched){speedEl.value=ranges[type].def;}
+  }
+  onCardioSpeedInput();
+  updateCardioPreview();
+}
+
+function onCardioSpeedInput(){
+  const speedEl=document.getElementById('cspeed');
+  speedEl.dataset.touched='1';
+  document.getElementById('cspeedv').textContent=speedEl.value+' km/saat';
+  updateCardioPreview();
+}
+
+// Sürətə (və maillik varsa) əsasən MET dəyərini hesablayır
+function estimateMET(type,speedKmh,inclinePct){
+  const v=parseFloat(speedKmh)||0;
+  if(type==='run'){
+    // ACSM formulası: VO2 = 0.2*sürət(m/dəq) + 0.9*sürət*maillik + 3.5, MET=VO2/3.5
+    const vMin=v*1000/60; // m/dəq
+    const grade=(inclinePct||0)/100;
+    const vo2=0.2*vMin+0.9*vMin*grade+3.5;
+    return Math.max(vo2/3.5,6);
+  }
+  if(type==='walk'){
+    const vMin=v*1000/60;
+    const grade=(inclinePct||0)/100;
+    const vo2=0.1*vMin+1.8*vMin*grade+3.5;
+    return Math.max(vo2/3.5,2);
+  }
+  if(type==='bike'){
+    // Sürətə görə təxmini MET pillələri
+    if(v<16)return 4.0;
+    if(v<19)return 6.0;
+    if(v<22)return 8.0;
+    if(v<26)return 10.0;
+    if(v<30)return 12.0;
+    return 15.8;
+  }
+  return null;
+}
+
+function getCardioMET(type){
+  const STATIC_MET={swim:7.0};
+  if(STATIC_MET[type]!=null)return STATIC_MET[type];
+  const speed=document.getElementById('cspeed')?.value;
+  const incline=document.getElementById('cincline')?.value;
+  return estimateMET(type,speed,incline)||7.0;
+}
+
+function updateCardioPreview(){
+  if(!cardioSel)return;
+  const dur=parseInt(document.getElementById('cdur').value)||0;
+  const kg=(weightLog[0]&&weightLog[0].kg)||75;
+  const met=getCardioMET(cardioSel);
+  const kcal=Math.round(met*kg*(dur/60));
+  const pv=document.getElementById('ckcalv');
+  if(pv)pv.textContent=kcal+' kkal';
+}
+
+function logCardio(){
+  if(!cardioSel)return;
+  const dur=parseInt(document.getElementById('cdur').value);
+  const labels={walk:'Gəzmək',swim:'Üzmək',run:'Qaçış',bike:'Velosiped'};
+  const kg=(weightLog[0]&&weightLog[0].kg)||75;
+  const met=getCardioMET(cardioSel);
+  const kcal=Math.round(met*kg*(dur/60));
+  let detail='';
+  if(cardioSel==='run'||cardioSel==='walk'||cardioSel==='bike'){
+    const speed=document.getElementById('cspeed').value;
+    detail+=` · ${speed} km/saat`;
+    if(cardioSel==='run'||cardioSel==='walk'){
+      const incline=document.getElementById('cincline').value;
+      if(parseFloat(incline)>0)detail+=` · ${incline}% maillik`;
+    }
+  }
+  fitLogs.unshift({type:'kardio',text:`${labels[cardioSel]||cardioSel} — ${dur} dəq${detail}`,kcal,date:new Date().toLocaleDateString('az-AZ')});
+  save('fitLogs',fitLogs);
+  renderCardioLog();renderFitMetrics();
+}
+
+function renderCardioLog(){
+  document.getElementById('cl').innerHTML=fitLogs.filter(e=>e.type==='kardio').map((e,i)=>`
+    <div class="ent">
+      <span class="ei">🏃</span>
+      <div class="eb"><div class="et">${e.text}${e.kcal?` — 🔥 ${e.kcal} kkal`:''}</div><div class="em">${e.date}</div></div>
+      <span class="edl" onclick="delCardio(${i})">✕</span>
+    </div>`).join('')||'<p class="empty">Hələ kardio qeydi yoxdur.</p>';
+}
+
+function delCardio(i){
+  const items=fitLogs.filter(e=>e.type==='kardio');
+  fitLogs.splice(fitLogs.indexOf(items[i]),1);
+  save('fitLogs',fitLogs);
+  renderCardioLog();renderFitMetrics();
+}
+
+// ═══ QİDA + PROTEİN ═══
+function getTodayStr(){
+  if(typeof dayjs!=='undefined') return dayjs().format(AZ_FMT);
+  return new Date().toLocaleDateString('az-AZ'); // dayjs CDN-dən yüklənməsə fallback
+}
+
+function calcTodayNutrition(){
+  const today=getTodayStr();
+  let kcal=0,prot=0;
+  nutrLogs.filter(e=>e.date===today).forEach(e=>{kcal+=e.kcal||0;prot+=e.prot||0;});
+  return {kcal,prot};
+}
+
+function renderProteinScale(){
+  const latestKg=weightLog[0]?.kg||null;
+  const {kcal,prot}=calcTodayNutrition();
+  const el=document.getElementById('today-kcal');
+  const ep=document.getElementById('today-prot');
+  if(el)el.textContent=Math.round(kcal);
+  if(ep)ep.textContent=Math.round(prot);
+  const goalEl=document.getElementById('prot-goal');
+  const fillEl=document.getElementById('prot-fill');
+  const statusEl=document.getElementById('prot-status');
+  const pctEl=document.getElementById('prot-pct');
+  const maxEl=document.getElementById('prot-max');
+  const frmEl=document.getElementById('prot-formula');
+  if(!goalEl)return;
+  if(!latestKg){
+    goalEl.textContent='—';
+    if(statusEl)statusEl.innerHTML='Çəkinizi <strong>İdman</strong> bölməsindən qeyd edin';
+    return;
+  }
+  const goal=Math.round(latestKg*1.6);
+  const pct=Math.min(100,Math.round(prot/goal*100));
+  goalEl.textContent=goal;
+  if(maxEl)maxEl.textContent=goal+' q';
+  if(fillEl)fillEl.style.width=pct+'%';
+  if(pctEl)pctEl.textContent=pct+'%';
+  if(frmEl)frmEl.textContent=latestKg.toFixed(1)+' kq × 1.6';
+  let statusTxt='';
+  const rem=Math.max(0,goal-Math.round(prot));
+  if(pct>=100) statusTxt=`<strong style="color:#2a9d2a">🎉 Hədəfə çatdın!</strong> Bu gün ${Math.round(prot)} q protein`;
+  else if(pct>=60) statusTxt=`Bu gün: <strong>${Math.round(prot)} q</strong> — daha <strong>${rem} q</strong> lazımdır`;
+  else statusTxt=`Bu gün: <strong>${Math.round(prot)} q</strong> protein alındı — ${rem} q qaldı`;
+  if(statusEl)statusEl.innerHTML=statusTxt;
+}
+
+// ═══ ŞƏKİLDƏN QİDA ANALİZİ (tesseract.js OCR) ═══
+let nfPer100Kcal=null, nfPer100Prot=null; // OCR-dən oxunan "100 qram üçün" baza dəyərlər
+
+function applyGramsScale(){
+  if(nfPer100Kcal==null && nfPer100Prot==null)return;
+  const g=parseFloat(document.getElementById('nf-grams').value);
+  const grams=isNaN(g)?0:g;
+  if(nfPer100Kcal!=null) document.getElementById('nf-kcal').value=Math.round(nfPer100Kcal*grams/100);
+  if(nfPer100Prot!=null) document.getElementById('nf-prot').value=Math.round(nfPer100Prot*grams/100*10)/10;
+}
+
+async function runNutritionOcr(file){
+  if(!file)return;
+  const statusEl=document.getElementById('nf-ocr-status');
+  if(typeof Tesseract==='undefined'){
+    Swal.fire({icon:'error',title:'OCR yüklənmədi',text:'İnternet bağlantısını yoxlayın.',confirmButtonColor:'#7c3aed'});
+    return;
+  }
+  statusEl.textContent='⏳ Şəkil oxunur...';
+  try{
+    const { data:{ text } } = await Tesseract.recognize(file,'eng+aze',{
+      logger:m=>{
+        if(m.status==='recognizing text'){
+          statusEl.textContent=`⏳ Oxunur... ${Math.round((m.progress||0)*100)}%`;
+        }
+      }
+    });
+    statusEl.textContent='';
+
+    // Mətndən kalori/protein rəqəmlərini axtar (AZ/EN açar sözləri ilə)
+    const kcalMatch = text.match(/(?:kalori|calor(?:ies)?|energy|enerji|kcal)[^\d]{0,15}(\d+(?:[.,]\d+)?)/i);
+    const protMatch = text.match(/(?:protein|zülal)[^\d]{0,15}(\d+(?:[.,]\d+)?)/i);
+
+    const kcalVal = kcalMatch ? parseFloat(kcalMatch[1].replace(',', '.')) : null;
+    const protVal = protMatch ? parseFloat(protMatch[1].replace(',', '.')) : null;
+
+    if(kcalVal==null && protVal==null){
+      Swal.fire({
+        icon:'warning',
+        title:'Rəqəm tapılmadı',
+        html:`Şəkildə kalori/protein rəqəmi avtomatik tapılmadı. Oxunan mətnə baxıb əl ilə daxil edə bilərsiniz:<br><small style="opacity:.7">${(text||'').slice(0,200).replace(/</g,'&lt;')}</small>`,
+        confirmButtonColor:'#7c3aed'
+      });
+      return;
+    }
+
+    // Bu rəqəmlər etiketdə adətən "100 qram üçün"dür — bazanı yadda saxlayıb
+    // istifadəçinin yediyi qrama görə avtomatik miqyaslamaq üçün "nf-grams" sahəsini göstəririk.
+    nfPer100Kcal = kcalVal;
+    nfPer100Prot = protVal;
+    document.getElementById('nf-grams').value=100;
+    document.getElementById('nf-grams-row').style.display='flex';
+    document.getElementById('nf-grams-base').textContent=
+      `(100 q-da: ${kcalVal!=null?kcalVal+' kkal':'—'}${protVal!=null?', '+protVal+' q protein':''})`;
+    applyGramsScale();
+    if(!document.getElementById('nf-name').value.trim())document.getElementById('nf-name').focus();
+
+    Swal.fire({
+      icon:'success',
+      title:'Qida dəyərləri tapıldı',
+      html:`${kcalVal!=null?'🔥 100 q-da: <b>'+kcalVal+'</b> kkal<br>':''}${protVal!=null?'🥩 100 q-da: <b>'+protVal+'</b> q protein<br>':''}<br><small style="opacity:.7">Aşağıda "Neçə qram yediniz?" sahəsinə yediyiniz miqdarı yazın — kalori/protein avtomatik hesablanacaq.</small>`,
+      confirmButtonColor:'#7c3aed'
+    });
+  }catch(e){
+    statusEl.textContent='';
+    Swal.fire({icon:'error',title:'OCR xətası',text:e.message||'Şəkil oxunmadı',confirmButtonColor:'#7c3aed'});
+  }finally{
+    document.getElementById('nf-ocr-file').value='';
+  }
+}
+
+function addNutrition(){
+  const name=document.getElementById('nf-name').value.trim();
+  const kcal=parseFloat(document.getElementById('nf-kcal').value)||0;
+  const prot=parseFloat(document.getElementById('nf-prot').value)||0;
+  if(!name)return;
+  nutrLogs.unshift({name,kcal,prot,date:getTodayStr(),ts:Date.now()});
+  document.getElementById('nf-name').value='';
+  document.getElementById('nf-kcal').value='';
+  document.getElementById('nf-prot').value='';
+  // OCR bazasını sıfırla ki, növbəti manual qeyd səhvən miqyaslanmasın
+  nfPer100Kcal=null; nfPer100Prot=null;
+  document.getElementById('nf-grams-row').style.display='none';
+  document.getElementById('nf-grams').value=100;
+  save('nutrLogs',nutrLogs);
+  renderFood();renderProteinScale();renderWeekChart();
+}
+
+function renderFood(){
+  const manHtml=nutrLogs.map((e,i)=>{
+    const origIdx=i;
+    return `
+    <div class="ent">
+      <span class="ei">🥗</span>
+      <div class="eb">
+        <div class="et">${e.name}</div>
+        <div class="em"><span class="bdg bp">🔥 ${e.kcal} kkal</span><span class="bdg" style="background:rgba(124,58,237,0.12);color:var(--pink-d)">🥩 ${e.prot} q</span>${e.date}</div>
+      </div>
+      <span class="edl" onclick="nutrLogs.splice(${origIdx},1);save('nutrLogs',nutrLogs);renderFood();renderProteinScale();renderWeekChart()">✕</span>
+    </div>`;
+  }).join('');
+  document.getElementById('foodlist').innerHTML=manHtml||'<p class="empty">Hələ qeyd yoxdur.</p>';
+}
+
+// ═══ MEDİA ═══
+let currentMediaTab='film';
+
+function switchMediaTab(tab,ev){
+  currentMediaTab=tab;
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('on'));
+  if(ev&&ev.target)ev.target.classList.add('on');
+  document.getElementById('lb-section').style.display=tab==='film'?'block':'none';
+  document.getElementById('author-row').style.display=tab==='kitab'?'block':'none';
+  document.getElementById('imdb-row').style.display=(tab==='film'||tab==='serial')?'flex':'none';
+  const titles={film:'Film əlavə et',serial:'Serial əlavə et',kitab:'Kitab əlavə et'};
+  document.getElementById('media-add-title').textContent=titles[tab];
+  document.getElementById('mi').placeholder=tab==='kitab'?'Kitab adı':tab==='serial'?'Serial adı':'Film adı';
+  renderMedia();
+}
+
+// (Letterboxd inteqrasiyası silindi)
+
+function addMedia(){
+  const val=document.getElementById('mi').value.trim();
+  if(!val)return;
+  const type=currentMediaTab;
+  const status=document.getElementById('mst').value;
+  const author=document.getElementById('mauthor').value.trim();
+  const entry={text:val,type,status,date:getTodayStr(),author:author||'',id:genMediaId()};
+  if(type==='film'||type==='serial'){
+    const imdb=document.getElementById('mimdb').value.trim();
+    entry.imdb=imdb||'';
+    mediaList.unshift(entry);
+    document.getElementById('mi').value='';document.getElementById('mimdb').value='';
+    save('mediaList',mediaList);renderMedia();renderMediaMetrics();
+    if(!imdb) autoFetchMediaInfo(entry, val);
+  } else {
+    mediaList.unshift(entry);
+    document.getElementById('mi').value='';document.getElementById('mauthor').value='';
+    save('mediaList',mediaList);renderMedia();renderMediaMetrics();
+  }
+}
+
+function addMediaBulk(){
+  const raw=document.getElementById('bulk-input').value;
+  const lines=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length)return;
+  const type=currentMediaTab;
+  const status=document.getElementById('bulk-status').value;
+
+  const newEntries=[];
+  lines.forEach(text=>{
+    const entry={text,type,status,date:getTodayStr(),author:'',id:genMediaId()};
+    if(type==='film'||type==='serial'){entry.imdb='';}
+    mediaList.unshift(entry);
+    newEntries.push(entry);
+  });
+  save('mediaList',mediaList);renderMedia();renderMediaMetrics();
+  document.getElementById('bulk-input').value='';
+  if(type==='film'||type==='serial'){
+    newEntries.forEach(entry=>autoFetchMediaInfo(entry, entry.text));
+  }
+}
+
+const MEDIA_STATUSES=['planım','izləyirəm','bitirdim'];
+
+function renderMedia(){
+  const ic={film:'🎬',serial:'📺',kitab:'📚'};
+  let filtered=mediaList.filter(e=>e.type===currentMediaTab);
+
+  // Fuzzy axtarış (krisk/Fuse) — sətirdə hərf səhvi olsa belə uyğun nəticəni tapır
+  const searchEl=document.getElementById('media-search');
+  const q=searchEl?searchEl.value.trim():'';
+  if(q && typeof Fuse!=='undefined'){
+    const fuse=new Fuse(filtered,{keys:['text','author','genre','cast'],threshold:0.4,ignoreLocation:true});
+    filtered=fuse.search(q).map(r=>r.item);
+  } else if(q){
+    const ql=q.toLowerCase();
+    filtered=filtered.filter(e=>(e.text||'').toLowerCase().includes(ql));
+  }
+
+  const cardHtml=(e)=>{
+    let meta='';
+    if((e.type==='film'||e.type==='serial')&&e.imdb)meta+=e.imdb==='⏳'?`<span class="bdg ba">⏳...</span>`:`<span class="bdg ba">⭐ ${e.imdb}</span>`;
+    if(e.year)meta+=`<span class="bdg bb">${e.year}</span>`;
+    if(e.type==='kitab'&&e.author)meta+=`<span class="bdg bb">✍️ ${e.author}</span>`;
+    const ago=timeAgo(e.date);
+    meta+=`<span style="color:var(--text3)">${ago||e.date}</span>`;
+    const hasPoster=(e.poster&&e.poster!=='N/A');
+    const posterImg=hasPoster
+      ?`<a href="${e.poster}" class="pswp-poster" data-pswp-width="1000" data-pswp-height="1500" data-cropped="true" title="${e.text}"><img class="kc-img" src="${e.poster}" alt="" onerror="this.closest('a').outerHTML='<span class=&quot;kc-icon&quot;>${ic[e.type]||'⭐'}</span>'"></a>`
+      :`<span class="kc-icon">${ic[e.type]||'⭐'}</span>`;
+    return `<div class="kanban-card" data-id="${e.id}">${posterImg}<div style="flex:1;min-width:0;position:relative"><div class="kc-title">${e.text}</div><div class="kc-meta">${meta}</div></div><span class="edl" style="flex-shrink:0" onclick="deleteMediaById('${e.id}')">✕</span></div>`;
+  };
+
+  MEDIA_STATUSES.forEach(st=>{
+    const items=filtered.filter(e=>e.status===st);
+    const listEl=document.getElementById('kl-'+st);
+    if(listEl) listEl.innerHTML=items.map(cardHtml).join('')||`<div class="kanban-empty">Boşdur</div>`;
+    const countEl=document.getElementById('kc-'+st);
+    if(countEl) countEl.textContent=items.length;
+  });
+
+  initMediaSortable();
+}
+
+function deleteMediaById(id){
+  const idx=mediaList.findIndex(e=>String(e.id)===String(id));
+  if(idx>-1){mediaList.splice(idx,1);save('mediaList',mediaList);renderMedia();renderMediaMetrics();}
+}
+
+let _mediaSortableInit=false;
+function initMediaSortable(){
+  if(typeof Sortable==='undefined')return;
+  MEDIA_STATUSES.forEach(st=>{
+    const el=document.getElementById('kl-'+st);
+    if(!el||el._sortableInit)return;
+    el._sortableInit=true;
+    Sortable.create(el,{
+      group:'media-kanban',
+      animation:150,
+      delay:80,
+      delayOnTouchOnly:true,
+      onEnd:function(evt){
+        const id=evt.item.dataset.id;
+        const newStatus=evt.to.closest('.kanban-col').dataset.status;
+        const entry=mediaList.find(e=>String(e.id)===String(id));
+        if(entry && entry.status!==newStatus){
+          entry.status=newStatus;
+          save('mediaList',mediaList);
+          renderMediaMetrics();
+        }
+        renderMedia();
+      }
+    });
+  });
+}
+
+function renderMediaMetrics(){
+  const films=mediaList.filter(e=>e.type==='film').length;
+  const serials=mediaList.filter(e=>e.type==='serial').length;
+  const books=mediaList.filter(e=>e.type==='kitab').length;
+  const done=mediaList.filter(e=>e.status==='bitirdim').length;
+  document.getElementById('mm').innerHTML=`
+    <div class="mc"><div class="mc-l">🎬 Film</div><div class="mc-v">${films}</div></div>
+    <div class="mc"><div class="mc-l">📺 Serial</div><div class="mc-v">${serials}</div></div>
+    <div class="mc"><div class="mc-l">📚 Kitab</div><div class="mc-v">${books}</div></div>
+    <div class="mc"><div class="mc-l">✅ Tamamlandı</div><div class="mc-v">${done}</div></div>`;
+}
+
+// ═══ MALİYYƏ ═══
+let fxRates=load('fxRates',{USD:1.70,EUR:1.85,RUB:0.021,AZN:1,ts:null}); // 1 unit -> AZN
+
+function loadFin(){
+  const d=load('finFields',{c:0,x:0});
+  document.getElementById('finc').value=d.c;
+  document.getElementById('finx').value=d.x;
+}
+
+function saveFin(){
+  save('finFields',{
+    c:document.getElementById('finc').value,
+    x:document.getElementById('finx').value
+  });
+}
+
+function getUsdRate(){return fxRates.USD||1.70;}
+
+// Hər investisiyanın AZN-ə çevrilmiş "qazanc" hissəsini hesablayır
+function calcInvestmentIncome(){
+  let total=0;
+  invList.forEach(inv=>{
+    if(inv.absoluteGain==null)return;
+    const rate=fxRates[(inv.currency||'AZN').toUpperCase()]||1;
+    total+=inv.absoluteGain*rate;
+  });
+  return total;
+}
+
+function calcFin(){
+  const income=parseFloat(document.getElementById('finc').value)||0;
+  const fixed=parseFloat(document.getElementById('finx').value)||0;
+  const invGelAzn=calcInvestmentIncome();
+  const logTotal=finLogs.reduce((s,e)=>s+(e.amount||0),0);
+  const borcTotal=borcList.reduce((s,e)=>s+getTotalBorc(e),0);
+  const invTotal=invList.reduce((s,e)=>{
+    const val=e.currentValue!=null?e.currentValue:(e.buyPrice||0)*(e.qty||1);
+    return s+val*(fxRates[(e.currency||'AZN').toUpperCase()]||1);
+  },0);
+  const pulTotal=pulList.reduce((s,n)=>s+(n.amount||0),0);
+  const totalIncome=income+invGelAzn;
+  const balance=totalIncome-fixed-logTotal;
+  const kapital=pulTotal+borcTotal+invTotal;
+
+  const kc=document.getElementById('kapital-card');
+  if(kc){
+    document.getElementById('kap-total').textContent=kapital.toFixed(0)+' ₼';
+    document.getElementById('kap-pul').textContent=pulTotal.toFixed(0)+' ₼';
+    document.getElementById('kap-inv').textContent=invTotal.toFixed(0)+' ₼';
+    document.getElementById('kap-invgel').textContent=invGelAzn.toFixed(0)+' ₼';
+  }
+  const pt=document.getElementById('pul-total');if(pt)pt.textContent=pulTotal.toFixed(0)+' ₼';
+
+  document.getElementById('finm').innerHTML=`
+    <div class="mc"><div class="mc-l">Əsas gəlir</div><div class="mc-v">${income.toFixed(0)} ₼</div></div>
+    <div class="mc"><div class="mc-l">💹 İnv. artımı</div><div class="mc-v" style="color:var(--pink)">${invGelAzn.toFixed(0)} ₼</div></div>
+    <div class="mc"><div class="mc-l">Ümumi gəlir</div><div class="mc-v" style="color:var(--pink-d)">${totalIncome.toFixed(0)} ₼</div></div>
+    <div class="mc"><div class="mc-l">Xərc</div><div class="mc-v">${(fixed+logTotal).toFixed(0)} ₼</div></div>
+    <div class="mc"><div class="mc-l">🤝 Borc al.</div><div class="mc-v" style="color:var(--warn-text)">${borcTotal.toFixed(0)} ₼</div></div>
+    <div class="mc"><div class="mc-l">Sərbəst</div><div class="mc-v" style="color:${balance>=0?'#2a9d2a':'var(--danger-text)'}">${balance.toFixed(0)} ₼</div></div>`;
+
+  renderExpensePie();
+  renderGoal(kapital,balance);
+}
+
+// ── PDF HESABAT (jsPDF) ──
+function exportFinPdf(){
+  if(typeof window.jspdf==='undefined'){
+    Swal.fire({icon:'error',title:'jsPDF yüklənmədi',text:'İnternet bağlantısını yoxlayın.',confirmButtonColor:'#7c3aed'});
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const income=parseAmount(document.getElementById('finc').value)||0;
+  const fixed=parseAmount(document.getElementById('finx').value)||0;
+  const invGelAzn=calcInvestmentIncome();
+  const logTotal=finLogs.reduce((s,e)=>s+(e.amount||0),0);
+  const borcTotal=borcList.reduce((s,e)=>s+getTotalBorc(e),0);
+  const pulTotal=pulList.reduce((s,n)=>s+(n.amount||0),0);
+  const invTotal=invList.reduce((s,e)=>{
+    const val=e.currentValue!=null?e.currentValue:(e.buyPrice||0)*(e.qty||1);
+    return s+val*(fxRates[(e.currency||'AZN').toUpperCase()]||1);
+  },0);
+  const totalIncome=income+invGelAzn;
+  const balance=totalIncome-fixed-logTotal;
+  const kapital=pulTotal+borcTotal+invTotal;
+
+  let y=18;
+  doc.setFontSize(16);doc.text('Maliyyə Hesabatı',14,y); y+=6;
+  doc.setFontSize(10);doc.setTextColor(120);doc.text(new Date().toLocaleString('az-AZ'),14,y); y+=10;
+  doc.setTextColor(20);
+
+  const row=(label,val)=>{doc.setFontSize(11);doc.text(String(label),14,y);doc.text(String(val),150,y,{align:'right'});y+=7;};
+  doc.setFontSize(12);doc.text('Ümumi Kapital: '+kapital.toFixed(0)+' ₼',14,y); y+=9;
+  row('  Pulum', pulTotal.toFixed(0)+' ₼');
+  row('  Borc alacaqlar', borcTotal.toFixed(0)+' ₼');
+  row('  İnvestisiya', invTotal.toFixed(0)+' ₼');
+  y+=4;
+  doc.setFontSize(12);doc.text('Aylıq Balans',14,y); y+=9;
+  row('Əsas gəlir', income.toFixed(0)+' ₼');
+  row('İnvestisiya artımı', invGelAzn.toFixed(0)+' ₼');
+  row('Ümumi gəlir', totalIncome.toFixed(0)+' ₼');
+  row('Sabit xərc', fixed.toFixed(0)+' ₼');
+  row('Digər xərclər', logTotal.toFixed(0)+' ₼');
+  row('Sərbəst qalıq', balance.toFixed(0)+' ₼');
+
+  if(borcList.length){
+    y+=6;doc.setFontSize(12);doc.text('Borc alacaqlar',14,y); y+=8;
+    borcList.forEach(b=>{
+      if(y>280){doc.addPage();y=18;}
+      row(b.name+(b.note?' ('+b.note+')':''), getTotalBorc(b).toFixed(0)+' ₼');
+    });
+  }
+  if(invList.length){
+    y+=6;if(y>270){doc.addPage();y=18;}
+    doc.setFontSize(12);doc.text('İnvestisiyalar',14,y); y+=8;
+    invList.forEach(inv=>{
+      if(y>280){doc.addPage();y=18;}
+      const val=inv.currentValue!=null?inv.currentValue:(inv.buyPrice||0)*(inv.qty||1);
+      row(inv.company+' ('+inv.ticker+')', val.toFixed(2)+' '+(inv.currency||''));
+    });
+  }
+
+  doc.save('maliyye-hesabati-'+getTodayStr().replace(/\./g,'-')+'.pdf');
+}
+
+// ── EXCEL HESABAT (SheetJS/XLSX) — hər kateqoriya öz vərəqində ──
+function exportFinExcel(){
+  if(typeof XLSX==='undefined'){
+    Swal.fire({icon:'error',title:'Excel modulu yüklənmədi',text:'İnternet bağlantısını yoxlayın.',confirmButtonColor:'#7c3aed'});
+    return;
+  }
+  const income=parseAmount(document.getElementById('finc').value)||0;
+  const fixed=parseAmount(document.getElementById('finx').value)||0;
+  const invGelAzn=calcInvestmentIncome();
+  const logTotal=finLogs.reduce((s,e)=>s+(e.amount||0),0);
+  const borcTotal=borcList.reduce((s,e)=>s+getTotalBorc(e),0);
+  const pulTotal=pulList.reduce((s,n)=>s+(n.amount||0),0);
+  const invTotal=invList.reduce((s,e)=>{
+    const val=e.currentValue!=null?e.currentValue:(e.buyPrice||0)*(e.qty||1);
+    return s+val*(fxRates[(e.currency||'AZN').toUpperCase()]||1);
+  },0);
+  const totalIncome=income+invGelAzn;
+  const balance=totalIncome-fixed-logTotal;
+  const kapital=pulTotal+borcTotal+invTotal;
+
+  const wb=XLSX.utils.book_new();
+
+  // 1) Xülasə
+  const summaryRows=[
+    ['Ümumi Kapital (₼)', Number(kapital.toFixed(2))],
+    ['  Pulum (₼)', Number(pulTotal.toFixed(2))],
+    ['  Borc alacaqlar (₼)', Number(borcTotal.toFixed(2))],
+    ['  İnvestisiya (₼)', Number(invTotal.toFixed(2))],
+    [],
+    ['Aylıq Balans',''],
+    ['Əsas gəlir (₼)', Number(income.toFixed(2))],
+    ['İnvestisiya artımı (₼)', Number(invGelAzn.toFixed(2))],
+    ['Ümumi gəlir (₼)', Number(totalIncome.toFixed(2))],
+    ['Sabit xərc (₼)', Number(fixed.toFixed(2))],
+    ['Digər xərclər (₼)', Number(logTotal.toFixed(2))],
+    ['Sərbəst qalıq (₼)', Number(balance.toFixed(2))],
+    [],
+    ['Hesabat tarixi', getTodayStr()]
+  ];
+  const wsSummary=XLSX.utils.aoa_to_sheet(summaryRows);
+  wsSummary['!cols']=[{wch:24},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsSummary,'Xülasə');
+
+  // 2) Xərc qeydləri
+  const expRows=[['Tarix','Qeyd','Kateqoriya','Məbləğ (₼)']];
+  finLogs.forEach(e=>expRows.push([e.date||'',e.text||'',e.cat||'',Number((e.amount||0).toFixed(2))]));
+  const wsExp=XLSX.utils.aoa_to_sheet(expRows);
+  wsExp['!cols']=[{wch:12},{wch:26},{wch:14},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsExp,'Xərc qeydləri');
+
+  // 3) Pulum
+  const pulRows=[['Tarix / Etiket','Məbləğ (₼)']];
+  pulList.forEach(n=>pulRows.push([n.label||n.date||'',Number((n.amount||0).toFixed(2))]));
+  pulRows.push(['Cəmi',Number(pulTotal.toFixed(2))]);
+  const wsPul=XLSX.utils.aoa_to_sheet(pulRows);
+  wsPul['!cols']=[{wch:20},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsPul,'Pulum');
+
+  // 4) Borc alacaqlar
+  const borcRows=[['Ad','Qeyd','Əsas məbləğ (₼)','Gündəlik artım (₼)','Tarix','Cəmi (₼)']];
+  borcList.forEach(b=>borcRows.push([b.name||'',b.note||'',Number((b.amount||0).toFixed(2)),Number((b.dailyAdd||0).toFixed(2)),b.date||'',Number(getTotalBorc(b).toFixed(2))]));
+  const wsBorc=XLSX.utils.aoa_to_sheet(borcRows);
+  wsBorc['!cols']=[{wch:16},{wch:20},{wch:14},{wch:14},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsBorc,'Borc alacaqlar');
+
+  // 5) İnvestisiya (portfel + manual əməliyyatlar)
+  const invRows=[['Şirkət','Ticker','Növ','Say','Alış qiyməti','Hazırkı qiymət','Valyuta','Yatırılan','Hazırkı dəyər','Gəlir','Gəlir %','Alış tarixi']];
+  invList.forEach(e=>{
+    const val=e.currentValue!=null?e.currentValue:(e.buyPrice||0)*(e.qty||1);
+    invRows.push([e.company||'',e.ticker||'',e.type||'',e.qty||0,Number((e.buyPrice||0).toFixed(2)),Number((e.currentPrice||0).toFixed(2)),e.currency||'',Number((e.amount||0).toFixed(2)),Number(val.toFixed(2)),Number((e.absoluteGain||0).toFixed(2)),Number((e.totalReturn||0).toFixed(2)),e.date||'']);
+  });
+  const wsInv=XLSX.utils.aoa_to_sheet(invRows);
+  wsInv['!cols']=[{wch:18},{wch:10},{wch:8},{wch:8},{wch:12},{wch:12},{wch:8},{wch:12},{wch:12},{wch:10},{wch:9},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsInv,'İnvestisiya');
+
+  if(investTrades.length){
+    const tradeRows=[['Ad','Növ','Yatırılan (₼)','Hazırkı (₼)','Tarix']];
+    investTrades.forEach(t=>tradeRows.push([t.name||'',t.type||'',Number((t.invested||0).toFixed(2)),Number((t.current||0).toFixed(2)),t.date||'']));
+    const wsTrades=XLSX.utils.aoa_to_sheet(tradeRows);
+    wsTrades['!cols']=[{wch:18},{wch:12},{wch:14},{wch:14},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,wsTrades,'Manual İnv. əməliyyatlar');
+  }
+
+  // 6) Bədən çəkisi
+  if(weightLog.length){
+    const wRows=[['Tarix','Çəki (kq)']];
+    weightLog.forEach(w=>wRows.push([w.date||'',Number((w.kg||0).toFixed(1))]));
+    const wsW=XLSX.utils.aoa_to_sheet(wRows);
+    wsW['!cols']=[{wch:14},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,wsW,'Bədən çəkisi');
+  }
+
+  XLSX.writeFile(wb,'maliyye-hesabati-'+getTodayStr().replace(/\./g,'-')+'.xlsx');
+  if(typeof Swal!=='undefined') Swal.fire({icon:'success',title:'Excel hazırdır!',timer:1300,showConfirmButton:false});
+}
+
+function addFin(){
+  const val=document.getElementById('fni').value.trim();
+  const amount=parseAmount(document.getElementById('fnam').value)||0;
+  if(!val)return;
+  finLogs.unshift({text:val,cat:document.getElementById('fncat').value,amount,date:getTodayStr()});
+  document.getElementById('fni').value='';document.getElementById('fnam').value='';
+  save('finLogs',finLogs);renderFinLog();calcFin();
+  toast('Xərc əlavə edildi');
+}
+
+function renderFinLog(){
+  document.getElementById('fnl').innerHTML=finLogs.map((e,i)=>`
+    <div class="ent"><span class="ei">🧾</span>
+    <div class="eb"><div class="et">${e.text} — ${(e.amount||0).toFixed(0)} ₼</div><div class="em"><span class="bdg ba">${e.cat}</span>${e.date}</div></div>
+    <span class="edl" onclick="finLogs.splice(${i},1);save('finLogs',finLogs);renderFinLog();calcFin()">✕</span></div>`).join('')||'<p class="empty">Hələ xərc qeydi yoxdur.</p>';
+}
+
+// ── BORC ──
+function getTotalBorc(e){
+  const base=e.amount||0;const daily=e.dailyAdd||0;
+  if(!daily)return base;
+  const from=e.dailyFrom?new Date(e.dailyFrom):parseDateAZ(e.date);
+  const fromMid=new Date(from.getFullYear(),from.getMonth(),from.getDate());
+  const now=new Date();
+  const nowMid=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const days=Math.max(0,Math.round((nowMid-fromMid)/(1000*60*60*24)));
+  return base+daily*days;
+}
+
+function parseDateAZ(str){
+  if(!str)return new Date();
+  if(typeof dayjs!=='undefined'){
+    const d=dayjs(str,AZ_FMT,true);
+    if(d.isValid()) return d.toDate();
+  }
+  // fallback (dayjs yoxdursa və ya format uyğun gəlmirsə)
+  const p=str.split('.');
+  if(p.length===3)return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  return new Date(str);
+}
+
+function addBorc(){
+  const ad=document.getElementById('borc-ad').value.trim();
+  const am=parseAmount(document.getElementById('borc-am').value)||0;
+  const not=document.getElementById('borc-not').value.trim();
+  if(!ad||!am)return;
+  borcList.unshift({name:ad,amount:am,note:not,date:getTodayStr(),dailyAdd:0,dailyFrom:null});
+  document.getElementById('borc-ad').value='';document.getElementById('borc-am').value='';document.getElementById('borc-not').value='';
+  save('borcList',borcList);renderBorcList();calcFin();
+  toast('Borc qeydi əlavə edildi');
+}
+
+function updateBorcDaily(i,val){
+  borcList[i].dailyAdd=parseFloat(val)||0;
+  if(!borcList[i].dailyFrom)borcList[i].dailyFrom=new Date().toISOString();
+  save('borcList',borcList);calcFin();
+}
+
+function renderBorcList(){
+  document.getElementById('borclist').innerHTML=borcList.map((e,i)=>{
+    const total=getTotalBorc(e);const accrued=total-(e.amount||0);
+    return `<div class="borc-card">
+      <div class="borc-main">
+        <div class="borc-info"><div class="borc-name">👤 ${e.name}</div><div class="borc-det">${e.note?e.note+' · ':''}${e.date}</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div><div class="borc-am">${total.toFixed(0)} ₼</div>${accrued>0?`<div style="font-size:10px;color:var(--pink);text-align:right">+${accrued.toFixed(0)} ₼</div>`:''}</div>
+          <span class="edl" onclick="borcList.splice(${i},1);save('borcList',borcList);renderBorcList();calcFin()">✕</span>
+        </div>
+      </div>
+      <div class="borc-extra">
+        <div class="borc-daily-row"><span>Günlük əlavə:</span>
+          <input type="number" value="${e.dailyAdd||''}" placeholder="0" min="0" onchange="updateBorcDaily(${i},this.value)">
+          <span>₼/gün</span>
+        </div>
+        ${e.dailyAdd?`<span class="borc-accrued">+${e.dailyAdd.toFixed(0)} ₼/gün</span>`:''}
+      </div>
+    </div>`;
+  }).join('')||'<p class="empty">Borc qeydi yoxdur.</p>';
+  initSortable('borclist',()=>borcList,'borcList',renderBorcList);
+}
+
+// ── İNVESTİSİYA — Yahoo Finance (yfinance kimi, API açarı lazım deyil) ──
+function openInvModal(){
+  openAnimModal('inv-modal');
+  document.getElementById('inv-search-result').style.display='none';
+  document.getElementById('inv-search-err').style.display='none';
+  document.getElementById('inv-query').value='';
+  document.getElementById('inv-amount').value='';
+  document.getElementById('inv-buy-price').value='';
+  document.getElementById('inv-date').value='';
+}
+function closeInvModal(){closeAnimModal('inv-modal');}
+
+// Yahoo Finance v8 quote endpoint (CORS proxy ilə)
+async function yahooQuote(ticker){
+  // allorigins.win - açıq CORS proxy
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const res=await fetch(proxy);
+  const outer=await res.json();
+  const data=JSON.parse(outer.contents);
+  const q=data?.chart?.result?.[0];
+  if(!q)throw new Error(`"${ticker}" tapılmadı`);
+  const meta=q.meta;
+  return{
+    ticker:meta.symbol,
+    company:meta.longName||meta.shortName||meta.symbol,
+    currency:meta.currency||'USD',
+    currentPrice:meta.regularMarketPrice||meta.previousClose,
+    prevClose:meta.previousClose,
+    change1d:meta.regularMarketPrice&&meta.previousClose?((meta.regularMarketPrice-meta.previousClose)/meta.previousClose*100):null,
+    type:meta.instrumentType||'EQUITY',
+    exchange:meta.exchangeName||''
+  };
+}
+
+async function yahooSearchInv(){
+  const ticker=(document.getElementById('inv-query').value.trim()).toUpperCase();
+  const qty=parseFloat(document.getElementById('inv-amount').value)||0;
+  const buyPrice=parseFloat(document.getElementById('inv-buy-price').value)||0;
+  const dateStr=document.getElementById('inv-date').value;
+
+  if(!ticker){showInvErr('Ticker yazın (məs: AAPL)');return;}
+  if(!qty){showInvErr('Neçə ədəd aldığınızı yazın');return;}
+  if(!buyPrice){showInvErr('Alış qiymətini yazın');return;}
+  if(!dateStr){showInvErr('Alış tarixini seçin');return;}
+
+  const btn=document.getElementById('inv-search-btn');
+  btn.textContent='⏳ Yüklənir...';btn.disabled=true;
+  document.getElementById('inv-search-err').style.display='none';
+
+  try{
+    const q=await yahooQuote(ticker);
+    const currency=q.currency||'USD';
+    const invested=buyPrice*qty;
+    const currentValue=q.currentPrice*qty;
+    const absGain=currentValue-invested;
+    const pctGain=invested?((absGain/invested)*100):0;
+    const isUp=absGain>=0;
+
+    const resEl=document.getElementById('inv-search-result');
+    resEl.style.display='block';
+    resEl.style.background=isUp?'var(--success-bg)':'#fde8e8';
+    resEl.style.color=isUp?'var(--success-text)':'#c0392b';
+    resEl.innerHTML=`
+      <strong>${q.ticker} · ${q.company}</strong> · ${q.exchange}<br>
+      İndiki qiymət: <strong>${q.currentPrice.toFixed(2)} ${currency}</strong>
+      ${q.change1d!=null?` <span style="font-size:11px">(${q.change1d>=0?'▲ +':'▼ '}${Math.abs(q.change1d).toFixed(2)}% bu gün)</span>`:''}<br>
+      Yatırım: ${invested.toFixed(2)} → Hazırkı: <strong>${currentValue.toFixed(2)} ${currency}</strong><br>
+      <strong style="font-size:14px">${isUp?'▲ +':'▼ '}${absGain.toFixed(2)} ${currency} (${isUp?'+':''}${pctGain.toFixed(2)}%)</strong>`;
+
+    const entry={
+      ticker:q.ticker,company:q.company,type:q.type,
+      qty,buyPrice,currency,date:dateStr,
+      amount:invested,
+      currentPrice:q.currentPrice,priceCurrency:currency,
+      totalReturn:pctGain,absoluteGain:absGain,currentValue,
+      change1d:q.change1d,
+      priceHistory:[buyPrice,q.currentPrice],
+      lastUpdated:new Date().toLocaleTimeString('az-AZ')
+    };
+    invList.unshift(entry);
+    save('invList',invList);
+    renderInvList();calcFin();
+
+    btn.textContent='✅ Əlavə edildi!';
+    setTimeout(()=>{closeInvModal();btn.textContent='📊 Qiymət çək & Əlavə et';btn.disabled=false;},1200);
+  }catch(e){
+    showInvErr(e.message||'Məlumat alınmadı');
+    btn.textContent='📊 Qiymət çək & Əlavə et';btn.disabled=false;
+  }
+}
+
+function showInvErr(msg){
+  const el=document.getElementById('inv-search-err');
+  el.style.display='block';el.textContent='⚠ '+msg;
+}
+
+async function refreshInvPrice(idx){
+  const inv=invList[idx];if(!inv)return;
+  const btn=document.querySelector(`[data-refresh="${idx}"]`);
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
+  try{
+    const q=await yahooQuote(inv.ticker);
+    const hist=inv.priceHistory||[];
+    hist.push(q.currentPrice);if(hist.length>30)hist.shift();
+    const invested=inv.buyPrice*(inv.qty||1);
+    const currentValue=q.currentPrice*(inv.qty||1);
+    const absGain=currentValue-invested;
+    const pctGain=invested?((absGain/invested)*100):0;
+    invList[idx]={...inv,currentPrice:q.currentPrice,change1d:q.change1d,priceHistory:hist,totalReturn:pctGain,absoluteGain:absGain,currentValue,lastUpdated:new Date().toLocaleTimeString('az-AZ')};
+    save('invList',invList);renderInvList();calcFin();
+  }catch(e){
+    Swal.fire({icon:'error',title:'Yenilənmədi',text:e.message,confirmButtonColor:'#7c3aed'});
+    if(btn){btn.textContent='🔄';btn.disabled=false;}
+  }
+}
+
+async function setInvPrice(idx){
+  const inv=invList[idx];if(!inv)return;
+  const {value:raw}=await Swal.fire({
+    title:`${inv.company} (${inv.ticker})`,
+    text:`Hazırkı qiyməti daxil edin (${inv.currency})`,
+    input:'number',
+    inputValue:inv.currentPrice||'',
+    showCancelButton:true,
+    confirmButtonText:'Yadda saxla',
+    cancelButtonText:'Ləğv et',
+    confirmButtonColor:'#7c3aed'
+  });
+  const val=parseFloat(raw);
+  if(raw==null||isNaN(val)||val<=0)return;
+  const hist=inv.priceHistory||[];
+  hist.push(val);if(hist.length>10)hist.shift();
+  const invested=inv.buyPrice*(inv.qty||1);
+  const currentValue=val*(inv.qty||1);
+  const absGain=currentValue-invested;
+  const pctGain=invested?((absGain/invested)*100):0;
+  invList[idx]={...inv,currentPrice:val,priceHistory:hist,totalReturn:pctGain,absoluteGain:absGain,currentValue,lastUpdated:new Date().toLocaleTimeString('az-AZ')};
+  save('invList',invList);renderInvList();calcFin();
+}
+
+function makeSparkline(history){
+  if(!history||history.length<2)return '<svg width="100%" height="50"><text x="50%" y="30" text-anchor="middle" font-size="11" fill="var(--text3)">—</text></svg>';
+  const mn=Math.min(...history),mx=Math.max(...history),range=mx-mn||1;
+  const w=300,h=50,pad=4;
+  const pts=history.map((v,i)=>{
+    const x=pad+(i/(history.length-1))*(w-pad*2);
+    const y=h-pad-((v-mn)/range)*(h-pad*2);
+    return `${x},${y}`;
+  });
+  const area=`M${pts[0]} L${pts.join(' L')} L${pts[pts.length-1].split(',')[0]},${h} L${pts[0].split(',')[0]},${h} Z`;
+  const isUp=history[history.length-1]>=history[0];
+  const color=isUp?'#2a9d2a':'var(--danger-text)';
+  const fillClr=isUp?'rgba(42,157,42,0.08)':'rgba(229,57,53,0.07)';
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="50" preserveAspectRatio="none">
+    <path d="M${pts[0]} L${pts.join(' L')}" fill="none" stroke="${color}" stroke-width="2"/>
+    <path d="${area}" fill="${fillClr}"/>
+  </svg>`;
+}
+
+// ═══ TEXNİKİ İNDİKATOR (technicalindicators kitabxanası) ═══
+// Qiymət tarixçəsi (priceHistory) əsasında sadə RSI/SMA siqnalı hesablayır.
+// Qeyd: dəqiqlik üçün adətən 14+ qiymət nöqtəsi lazımdır; bizdə tarixçə "Yenilə"
+// düyməsi basıldıqca böyüdüyü üçün əvvəlcə az data ilə işləyəcək.
+function getInvSignal(history){
+  if(typeof RSI==='undefined'||typeof SMA==='undefined')return null;
+  if(!history||history.length<5)return null;
+  try{
+    const rsiPeriod=Math.min(14,Math.max(2,history.length-1));
+    const rsiVals=RSI.calculate({period:rsiPeriod,values:history});
+    const rsi=rsiVals.length?rsiVals[rsiVals.length-1]:null;
+
+    const shortP=Math.min(3,history.length);
+    const longP=Math.min(7,history.length);
+    const smaShortVals=SMA.calculate({period:shortP,values:history});
+    const smaLongVals=SMA.calculate({period:longP,values:history});
+    const smaShort=smaShortVals.length?smaShortVals[smaShortVals.length-1]:null;
+    const smaLong=smaLongVals.length?smaLongVals[smaLongVals.length-1]:null;
+
+    let signal='Neytral',color='var(--text2)';
+    if(rsi!=null&&rsi>=70){signal='⚠ Aşırı alınıb (SAT?)';color='var(--danger-text)';}
+    else if(rsi!=null&&rsi<=30){signal='✅ Aşırı satılıb (AL?)';color='#2a9d2a';}
+    else if(smaShort!=null&&smaLong!=null&&shortP!==longP){
+      if(smaShort>smaLong){signal='📈 Qısamüddətli trend yuxarı';color='#2a9d2a';}
+      else if(smaShort<smaLong){signal='📉 Qısamüddətli trend aşağı';color='var(--danger-text)';}
+    }
+    return {rsi:rsi!=null?rsi.toFixed(1):null,signal,color};
+  }catch(e){return null;}
+}
+
+let invPieChart=null; // Chart.js instansı
+
+function renderInvPie(){
+  const cardEl=document.getElementById('inv-pie-card');
+  const pieEl=document.getElementById('inv-pie');
+  const legEl=document.getElementById('inv-pie-legend');
+  if(!cardEl||!pieEl)return;
+  const rate=r=>fxRates[(r||'USD').toUpperCase()]||1;
+
+  // Hər holding-i AZN-ə çevirib şirkət adına görə qruplaşdırırıq
+  const byCompany={};
+  invList.forEach(inv=>{
+    const val=(inv.currentValue!=null?inv.currentValue:(inv.buyPrice||0)*(inv.qty||1))*rate(inv.currency);
+    const key=inv.company||inv.ticker||'Digər';
+    byCompany[key]=(byCompany[key]||0)+val;
+  });
+  const total=Object.values(byCompany).reduce((a,b)=>a+b,0);
+
+  if(invPieChart){invPieChart.destroy();invPieChart=null;}
+
+  if(!total){cardEl.style.display='none';return;}
+  cardEl.style.display='';
+
+  const colors=['#7c3aed','#c4b5fd','#a78bfa','#5b21b6','#ddd6fe','#9f7aea','#4c1d95','#f0abfc'];
+  const entries=Object.entries(byCompany).sort((a,b)=>b[1]-a[1]);
+
+  if(typeof Chart!=='undefined'){
+    invPieChart=new Chart(pieEl,{
+      type:'doughnut',
+      data:{
+        labels:entries.map(e=>e[0]),
+        datasets:[{data:entries.map(e=>e[1]),backgroundColor:entries.map((_,i)=>colors[i%colors.length]),borderWidth:0}]
+      },
+      options:{
+        responsive:false,
+        cutout:'45%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed.toFixed(0)} ₼`}}}
+      }
+    });
+  }
+
+  legEl.innerHTML=entries.map((e,i)=>{
+    const pct=(e[1]/total*100).toFixed(0);
+    return`<div class="pie-legend-row"><span class="lbl"><span class="legend-dot" style="background:${colors[i%colors.length]}"></span>${e[0]}</span><span class="val">${e[1].toFixed(0)} ₼ (${pct}%)</span></div>`;
+  }).join('');
+}
+
+// ═══ MANUAL YATIRIM NƏTİCƏLƏRİ (Səhm/ETF/Kripto — mənfəət/zərər) ═══
+function parseAmt(str){
+  // "120+35" kimi ifadələri də dəstəkləyir (tətbiqin digər məbləğ sahələri kimi)
+  if(!str)return 0;
+  try{
+    if(typeof math!=='undefined') return math.evaluate(String(str).replace(',','.'))||0;
+  }catch{}
+  return parseFloat(String(str).replace(',','.'))||0;
+}
+
+function addInvestTrade(){
+  const name=document.getElementById('it-name').value.trim();
+  const type=document.getElementById('it-type').value;
+  const invested=parseAmt(document.getElementById('it-invested').value);
+  const current=parseAmt(document.getElementById('it-current').value);
+  if(!name||!invested)return;
+  investTrades.unshift({name,type,invested,current,date:getTodayStr(),ts:Date.now()});
+  document.getElementById('it-name').value='';
+  document.getElementById('it-invested').value='';
+  document.getElementById('it-current').value='';
+  save('investTrades',investTrades);
+  renderInvestTrades();
+}
+
+function deleteInvestTrade(i){
+  investTrades.splice(i,1);
+  save('investTrades',investTrades);
+  renderInvestTrades();
+}
+
+function renderInvestTrades(){
+  const listEl=document.getElementById('it-list');
+  const sumEl=document.getElementById('it-summary');
+  if(!listEl)return;
+  const icons={'Səhm':'📈','ETF':'📊','Kripto':'₿'};
+  listEl.innerHTML=investTrades.map((t,i)=>{
+    const pl=t.current-t.invested;
+    const pct=t.invested?(pl/t.invested*100):0;
+    const up=pl>=0;
+    const badge=`<span class="bdg" style="background:${up?'rgba(42,157,42,0.12)':'rgba(192,57,43,0.12)'};color:${up?'#2a9d2a':'#c0392b'}">${up?'▲ +':'▼ '}${Math.abs(pl).toFixed(2)} ₼ (${up?'+':''}${pct.toFixed(1)}%)</span>`;
+    return `<div class="ent">
+      <span class="ei">${icons[t.type]||'💰'}</span>
+      <div class="eb">
+        <div class="et">${t.name} <span class="bdg bb" style="margin-left:4px">${t.type}</span></div>
+        <div class="em">Qoyulan: ${t.invested.toFixed(2)} ₼ · Hazırkı: ${t.current.toFixed(2)} ₼ ${badge} · ${t.date}</div>
+      </div>
+      <span class="edl" onclick="deleteInvestTrade(${i})">✕</span>
+    </div>`;
+  }).join('') || '<p class="empty">Hələ heç bir yatırım qeydi yoxdur.</p>';
+
+  if(investTrades.length){
+    const totalInv=investTrades.reduce((s,t)=>s+t.invested,0);
+    const totalCur=investTrades.reduce((s,t)=>s+t.current,0);
+    const totalPl=totalCur-totalInv;
+    const totalPct=totalInv?(totalPl/totalInv*100):0;
+    const up=totalPl>=0;
+    sumEl.innerHTML=`Cəmi qoyulan: <strong>${totalInv.toFixed(2)} ₼</strong> → Hazırkı: <strong>${totalCur.toFixed(2)} ₼</strong> &nbsp; <span style="color:${up?'#2a9d2a':'#c0392b'}">${up?'▲ +':'▼ '}${Math.abs(totalPl).toFixed(2)} ₼ (${up?'+':''}${totalPct.toFixed(1)}%)</span>`;
+  } else {
+    sumEl.textContent='';
+  }
+}
+
+function renderInvList(){
+  initSortable('invlist',()=>invList,'invList',renderInvList);
+  renderInvPie();
+  if(!invList.length){document.getElementById('invlist').innerHTML='<p class="empty">Hələ investisiya qeydi yoxdur. "+ Şirkət əlavə et" düyməsini sıxın.</p>';return;}
+  const rate=r=>fxRates[(r||'USD').toUpperCase()]||1;
+  document.getElementById('invlist').innerHTML=invList.map((inv,i)=>{
+    const isUp=(inv.absoluteGain||0)>=0;
+    const gainColor=isUp?'#2a9d2a':'var(--danger-text)';
+    const gainSign=isUp?'▲ +':'▼ ';
+    const pct=inv.totalReturn!=null?inv.totalReturn.toFixed(2):null;
+    const absG=inv.absoluteGain!=null?inv.absoluteGain.toFixed(2):null;
+    const curV=inv.currentValue!=null?inv.currentValue.toFixed(2):null;
+    const invested=(inv.buyPrice||0)*(inv.qty||1);
+    const aznVal=inv.currentValue?((inv.currentValue)*rate(inv.currency)).toFixed(0):null;
+
+    return `<div class="inv-card">
+      <div class="inv-head">
+        <div>
+          <div class="inv-name">${inv.company}</div>
+          <div class="inv-ticker">${inv.ticker} · ${inv.type||''} · ${inv.date||''}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${inv.qty||1} vahid × ${(inv.buyPrice||0).toFixed(2)} ${inv.currency} = ${invested.toFixed(2)} ${inv.currency} yatırım</div>
+          ${aznVal?`<div class="inv-azn-badge">≈ ${aznVal} ₼</div>`:''}
+        </div>
+        <div class="inv-price" style="text-align:right">
+          <div style="font-size:16px;font-weight:700">${inv.currentPrice?(inv.currentPrice.toFixed(2)+' '+inv.currency):'—'}</div>
+          ${pct!=null?`<div style="font-size:13px;font-weight:600;color:${gainColor}">${gainSign}${Math.abs(pct)}%</div>`:''}
+          ${absG!=null?`<div style="font-size:11px;color:${gainColor}">${gainSign}${Math.abs(absG)} ${inv.currency}</div>`:''}
+        </div>
+      </div>
+      <div class="inv-chart">${makeSparkline(inv.priceHistory)}</div>
+      ${(()=>{const sig=getInvSignal(inv.priceHistory);return sig?`<div style="font-size:11px;margin-top:.3rem;color:${sig.color}">${sig.signal}${sig.rsi!=null?' · RSI '+sig.rsi:''}</div>`:'';})()}
+      ${curV?`<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:.4rem"><span>💼 Hazırkı dəyər: <strong style="color:${gainColor}">${curV} ${inv.currency}</strong></span>${inv.lastUpdated?`<span>🕐 ${inv.lastUpdated}</span>`:''}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:.65rem;flex-wrap:wrap">
+        <button class="btn" style="font-size:11px;padding:4px 9px" data-refresh="${i}" onclick="refreshInvPrice(${i})">🔄 Yenilə</button>
+        <button class="btn" style="font-size:11px;padding:4px 9px" onclick="setInvPrice(${i})">✏ Əl ilə</button>
+        <button class="btn" style="font-size:11px;padding:4px 9px;color:var(--danger-text)" onclick="invList.splice(${i},1);save('invList',invList);renderInvList();calcFin()">Sil</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ÜMUMİ PULUM (nağd + kart birləşdirilmiş) ──
+function addPul(){
+  const amount=parseAmount(document.getElementById('pul-input').value);
+  if(!amount||isNaN(amount))return;
+  pulList.push({id:Date.now()+Math.random(),amount,date:getTodayStr()});
+  document.getElementById('pul-input').value='';
+  save('pulList',pulList);renderPulList();calcFin();
+}
+function deletePul(id){pulList=pulList.filter(n=>n.id!==id);save('pulList',pulList);renderPulList();calcFin();}
+function updatePul(id,val){const n=pulList.find(n=>n.id===id);if(n){n.amount=parseFloat(val)||0;save('pulList',pulList);calcFin();}}
+function renderPulList(){
+  const el=document.getElementById('pul-list');if(!el)return;
+  el.innerHTML=pulList.map(n=>{
+    const lbl=n.label?n.label:n.date;
+    return `<div class="cash-row"><label style="font-size:11px;color:var(--text3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px" title="${lbl}">${lbl}</label><input type="number" value="${n.amount}" onchange="updatePul(${n.id},this.value)" style="flex:1"><span class="cash-delete-btn" onclick="deletePul(${n.id})">✕</span></div>`;
+  }).join('');
+  const t=document.getElementById('pul-total');if(t)t.textContent=pulList.reduce((s,n)=>s+(n.amount||0),0).toFixed(0)+' ₼';
+  initSortable('pul-list',()=>pulList,'pulList',renderPulList);
+}
+
+// ── İNVESTİSİYA ÜÇÜN MƏZƏNNƏLƏR (manual) ──
+async function setRates(){
+  const { value: form } = await Swal.fire({
+    title:'Məzənnələri təyin et',
+    html:
+      `<div style="text-align:left;font-size:13px;display:flex;flex-direction:column;gap:8px">
+        <label>1 USD = ? AZN<input id="swal-usd" type="number" step="0.0001" class="swal2-input" style="margin:2px 0" value="${fxRates.USD||1.70}"></label>
+        <label>1 EUR = ? AZN<input id="swal-eur" type="number" step="0.0001" class="swal2-input" style="margin:2px 0" value="${fxRates.EUR||1.85}"></label>
+        <label>1 RUB = ? AZN<input id="swal-rub" type="number" step="0.0001" class="swal2-input" style="margin:2px 0" value="${fxRates.RUB||0.021}"></label>
+      </div>`,
+    focusConfirm:false,
+    showCancelButton:true,
+    confirmButtonText:'Yadda saxla',
+    cancelButtonText:'Ləğv et',
+    confirmButtonColor:'#7c3aed',
+    preConfirm:()=>({
+      usd:parseFloat(document.getElementById('swal-usd').value),
+      eur:parseFloat(document.getElementById('swal-eur').value),
+      rub:parseFloat(document.getElementById('swal-rub').value)
+    })
+  });
+  if(!form)return;
+  if(!isNaN(form.usd)&&form.usd>0)fxRates.USD=form.usd;
+  if(!isNaN(form.eur)&&form.eur>0)fxRates.EUR=form.eur;
+  if(!isNaN(form.rub)&&form.rub>0)fxRates.RUB=form.rub;
+  fxRates.AZN=1;
+  fxRates.ts=new Date().toLocaleString('az-AZ');
+  save('fxRates',fxRates);
+  calcFin();renderInvList();
+  Swal.fire({icon:'success',title:'Məzənnələr yeniləndi',timer:1200,showConfirmButton:false});
+}
+
+// ── HƏDƏF ──
+let finGoal=load('finGoal',null); // {name,amount}
+
+function setGoal(){
+  const name=document.getElementById('goal-name').value.trim();
+  const amount=parseFloat(document.getElementById('goal-amount').value)||0;
+  if(!name||!amount)return;
+  finGoal={name,amount};
+  save('finGoal',finGoal);
+  document.getElementById('goal-name').value='';document.getElementById('goal-amount').value='';
+  calcFin();
+}
+
+function renderGoal(kapital,balance){
+  const fillEl=document.getElementById('goal-fill');
+  const statusEl=document.getElementById('goal-status');
+  const pctEl=document.getElementById('goal-pct');
+  if(!fillEl)return;
+  if(!finGoal){
+    fillEl.style.width='0%';
+    statusEl.textContent='Hədəf qoyulmayıb — aşağıda təyin edin';
+    pctEl.textContent='';
+    return;
+  }
+  const progress=Math.max(0,kapital);
+  const pct=Math.min(100,Math.round(progress/finGoal.amount*100));
+  fillEl.style.width=pct+'%';
+  pctEl.textContent=pct+'%';
+  if(pct>=100) statusEl.innerHTML=`🎉 <strong>"${finGoal.name}"</strong> hədəfinə çatdın! (${progress.toFixed(0)} / ${finGoal.amount} ₼)`;
+  else statusEl.innerHTML=`<strong>"${finGoal.name}"</strong> — ${progress.toFixed(0)} / ${finGoal.amount} ₼ (ümumi kapitala görə)`;
+}
+
+// ── AYLIQ XƏRC PIE CHART ──
+let expensePieChart=null; // Chart.js instansı (yenidən çəkiləndə destroy edilir)
+
+// ═══ AY MÜQAYİSƏSİ (bu ay vs keçən ay) — ümumi köməkçi ═══
+function getMonthRange(offsetMonths){
+  const d=new Date();d.setMonth(d.getMonth()+offsetMonths);
+  return{m:d.getMonth(),y:d.getFullYear()};
+}
+function buildMonthCompareHtml(curVal,prevVal,unit,higherIsBad){
+  let deltaHtml='';
+  if(prevVal>0){
+    const diff=curVal-prevVal;
+    const pct=diff/prevVal*100;
+    const isUp=diff>0;
+    const cls=diff===0?'eq':((isUp&&higherIsBad)||(!isUp&&!higherIsBad)?'up':'dn');
+    const arrow=diff===0?'=':(isUp?'▲':'▼');
+    deltaHtml=`<div class="cmp-delta ${cls}">${arrow} ${Math.abs(pct).toFixed(0)}% (${isUp?'+':''}${diff.toFixed(0)} ${unit})</div>`;
+  } else if(curVal>0){
+    deltaHtml=`<div class="cmp-delta eq">Keçən ay qeyd yoxdur</div>`;
+  }
+  return`
+    <div class="cmp-box"><div class="cmp-lbl">Bu ay</div><div class="cmp-val">${curVal.toFixed(0)} ${unit}</div>${deltaHtml}</div>
+    <div class="cmp-box"><div class="cmp-lbl">Keçən ay</div><div class="cmp-val">${prevVal.toFixed(0)} ${unit}</div></div>`;
+}
+
+function renderFinMonthCompare(){
+  const el=document.getElementById('fin-month-compare');
+  if(!el)return;
+  const cur=getMonthRange(0),prev=getMonthRange(-1);
+  const sum=(m,y)=>finLogs.filter(e=>{const d=parseDateAZ(e.date);return d.getMonth()===m&&d.getFullYear()===y;}).reduce((s,e)=>s+(e.amount||0),0);
+  el.innerHTML=buildMonthCompareHtml(sum(cur.m,cur.y),sum(prev.m,prev.y),'₼',true);
+}
+
+function renderFoodMonthCompare(){
+  const el=document.getElementById('food-month-compare');
+  if(!el)return;
+  const cur=getMonthRange(0),prev=getMonthRange(-1);
+  const sum=(m,y)=>nutrLogs.filter(n=>{const d=parseDateAZ(n.date);return d.getMonth()===m&&d.getFullYear()===y;}).reduce((s,n)=>s+(n.kcal||0),0);
+  el.innerHTML=buildMonthCompareHtml(sum(cur.m,cur.y),sum(prev.m,prev.y),'kkal',true);
+}
+
+function renderExpensePie(){
+  renderFinMonthCompare();
+  const pieEl=document.getElementById('exp-pie');
+  const legEl=document.getElementById('exp-legend');
+  if(!pieEl)return;
+  const now=new Date();
+  const monthly=finLogs.filter(e=>{
+    const d=parseDateAZ(e.date);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  const cats={};
+  monthly.forEach(e=>{cats[e.cat]=(cats[e.cat]||0)+(e.amount||0);});
+  const total=Object.values(cats).reduce((a,b)=>a+b,0);
+
+  if(expensePieChart){expensePieChart.destroy();expensePieChart=null;}
+
+  if(!total){
+    pieEl.style.display='none';
+    legEl.innerHTML='<p class="empty">Bu ay xərc qeydi yoxdur.</p>';
+    return;
+  }
+  pieEl.style.display='';
+
+  const colors=['#7c3aed','#c4b5fd','#a78bfa','#5b21b6','#ddd6fe','#9f7aea'];
+  const catNames={yemək:'🍔 Yemək',nəqliyyat:'🚌 Nəqliyyat',təhsil:'📚 Təhsil',əyləncə:'🎉 Əyləncə',digər:'📦 Digər'};
+  const entries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+
+  if(typeof Chart!=='undefined'){
+    expensePieChart=new Chart(pieEl,{
+      type:'doughnut',
+      data:{
+        labels:entries.map(e=>catNames[e[0]]||e[0]),
+        datasets:[{data:entries.map(e=>e[1]),backgroundColor:entries.map((_,i)=>colors[i%colors.length]),borderWidth:0}]
+      },
+      options:{
+        responsive:false,
+        cutout:'45%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed.toFixed(0)} ₼`}}}
+      }
+    });
+  }
+
+  legEl.innerHTML=entries.map((e,i)=>{
+    const pct=(e[1]/total*100).toFixed(0);
+    return `<div class="pie-legend-row"><span class="lbl"><span class="legend-dot" style="background:${colors[i%colors.length]}"></span>${catNames[e[0]]||e[0]}</span><span class="val">${e[1].toFixed(0)} ₼ (${pct}%)</span></div>`;
+  }).join('');
+}
+
+// ═══ YUXU TRACKER ═══
+let sleepLog=load('sleepLog',[]); // [{hours,date,ts}]
+
+function addSleep(){
+  const hours=parseFloat(document.getElementById('sleep-input').value);
+  const today=getTodayStr();
+  const existing=sleepLog.find(s=>s.date===today);
+  if(existing){existing.hours=hours;}
+  else{sleepLog.unshift({hours,date:today,ts:Date.now()});}
+  save('sleepLog',sleepLog);
+  renderSleep();
+  toast('Yuxu qeyd edildi');
+}
+
+function workoutDoneOnDate(dateStr){
+  // fitLogs-dakı qeydlərə görə həmin tarixdə trenirovka/kardio olub-olmadığını yoxlayır
+  return fitLogs.some(l=>l.date===dateStr);
+}
+
+function renderSleep(){
+  const histEl=document.getElementById('sleep-hist');
+  const corrEl=document.getElementById('sleep-corr');
+  const todayEl=document.getElementById('sleep-today');
+  if(!histEl)return;
+  const today=getTodayStr();
+  const todayEntry=sleepLog.find(s=>s.date===today);
+  if(todayEntry){
+    document.getElementById('sleep-input').value=todayEntry.hours;
+    document.getElementById('sleep-val').textContent=todayEntry.hours+' saat';
+    todayEl.textContent='Bu gün: '+todayEntry.hours+' saat';
+  } else { todayEl.textContent=''; }
+
+  const last7=sleepLog.slice(0,7);
+  histEl.innerHTML=last7.slice().reverse().map(s=>{
+    const did=workoutDoneOnDate(s.date);
+    return `<span class="sleep-dot ${did?'workout':''}" title="${s.date}">${s.hours}sa${did?' 💪':''}</span>`;
+  }).join('');
+
+  if(last7.length<3){
+    corrEl.innerHTML='Korrelyasiya görmək üçün ən azı 3 gün yuxu qeyd edin.';
+    return;
+  }
+  const withWorkout=last7.filter(s=>workoutDoneOnDate(s.date));
+  const withoutWorkout=last7.filter(s=>!workoutDoneOnDate(s.date));
+  const avg=arr=>arr.length?(arr.reduce((a,b)=>a+b.hours,0)/arr.length):null;
+  const avgW=avg(withWorkout),avgN=avg(withoutWorkout);
+  if(avgW!=null&&avgN!=null){
+    const diff=avgW-avgN;
+    const txt=diff>0
+      ? `İdman etdiyiniz günlərdə orta yuxu <strong>${avgW.toFixed(1)} saat</strong>, etmədiyiniz günlərdə <strong>${avgN.toFixed(1)} saat</strong> — daha çox yatdığınız günlər idmana daha çox uyğun gəlir.`
+      : `İdman etdiyiniz günlərdə orta yuxu <strong>${avgW.toFixed(1)} saat</strong>, etmədiyiniz günlərdə <strong>${avgN.toFixed(1)} saat</strong>.`;
+    corrEl.innerHTML=txt;
+  } else if(avgW!=null){
+    corrEl.innerHTML=`İdman etdiyiniz günlərdə orta yuxu <strong>${avgW.toFixed(1)} saat</strong>.`;
+  } else {
+    corrEl.innerHTML='Hələ idman qeydi olan gün yoxdur ki müqayisə edək.';
+  }
+}
+
+// ═══ HƏFTƏLİK KALORİ/PROTEİN QRAFİKİ ═══
+let weekChartInstance=null; // Chart.js instansı
+
+function renderWeekChart(){
+  renderFoodMonthCompare();
+  const el=document.getElementById('week-chart');
+  if(!el)return;
+  const days=[];
+  const today=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    days.push(d.toLocaleDateString('az-AZ'));
+  }
+  const dayLabels=['B.','B.e','Ç.a','Ç.','C.a','C.','Ş.'];
+  const totals=days.map(ds=>{
+    const entries=nutrLogs.filter(n=>n.date===ds);
+    return {
+      kcal:entries.reduce((s,n)=>s+(n.kcal||0),0),
+      prot:entries.reduce((s,n)=>s+(n.prot||0),0)
+    };
+  });
+  const labels=days.map(ds=>{
+    const [dd,mm,yyyy]=ds.split('.');
+    const dow=new Date(yyyy,mm-1,dd).getDay();
+    return dayLabels[dow];
+  });
+
+  if(weekChartInstance){weekChartInstance.destroy();weekChartInstance=null;}
+  if(typeof Chart==='undefined')return;
+
+  weekChartInstance=new Chart(el,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Kalori (kkal/10)',data:totals.map(t=>Math.round(t.kcal/10)),backgroundColor:'#7c3aed',borderRadius:4},
+        {label:'Protein (q)',data:totals.map(t=>Math.round(t.prot)),backgroundColor:'#c4b5fd',borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(124,58,237,0.08)'}}},
+      plugins:{legend:{display:false}}
+    }
+  });
+}
+
+
+// ═══ TƏQVİM / TAPŞIRIQLAR ═══
+let calTasks=load('calTasks',[]); // [{date:'DD.MM.YYYY', text, done}]
+let calViewDate=new Date();
+let calSelectedDate=getTodayStr();
+
+const CAL_MONTHS=['Yanvar','Fevral','Mart','Aprel','May','İyun','İyul','Avqust','Sentyabr','Oktyabr','Noyabr','Dekabr'];
+const CAL_DOW=['B.e','Ç.a','Ç.','C.a','C.','Ş.','B.'];
+
+function calChangeMonth(delta){
+  calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+delta,1);
+  renderCalGrid();
+}
+
+function calGoToday(){
+  calViewDate=new Date();
+  calSelectedDate=getTodayStr();
+  renderCalGrid();renderCalSelList();
+}
+
+function calSelectDay(dateStr){
+  calSelectedDate=dateStr;
+  renderCalGrid();renderCalSelList();
+}
+
+function addCalTask(){
+  const input=document.getElementById('cal-task-input');
+  const text=input.value.trim();
+  if(!text)return;
+  calTasks.push({date:calSelectedDate,text,done:false});
+  input.value='';
+  save('calTasks',calTasks);
+  renderCalGrid();renderCalSelList();renderCalToday();
+  toast('Tapşırıq əlavə edildi');
+}
+
+function toggleCalTask(idx){
+  calTasks[idx].done=!calTasks[idx].done;
+  save('calTasks',calTasks);
+  renderCalGrid();renderCalSelList();renderCalToday();
+}
+
+function delCalTask(idx){
+  calTasks.splice(idx,1);
+  save('calTasks',calTasks);
+  renderCalGrid();renderCalSelList();renderCalToday();
+}
+
+function calTaskRow(t,idx){
+  return `<div class="ent">
+    <input type="checkbox" class="exck" ${t.done?'checked':''} onchange="toggleCalTask(${idx})">
+    <div class="eb"><div class="et" style="${t.done?'text-decoration:line-through;opacity:.5':''}">${t.text}</div></div>
+    <span class="edl" onclick="delCalTask(${idx})">✕</span>
+  </div>`;
+}
+
+function renderCalToday(){
+  const el=document.getElementById('cal-today-list');
+  if(!el)return;
+  const today=getTodayStr();
+  const rows=calTasks.map((t,i)=>({t,i})).filter(x=>x.t.date===today);
+  el.innerHTML=rows.length
+    ? rows.map(x=>calTaskRow(x.t,x.i)).join('')
+    : '<p class="empty">Bu gün üçün tapşırıq yoxdur.</p>';
+}
+
+// ═══ AKTİVLİK XƏRİTƏSİ (simonbengtsson/calendar-heatmap tərzi, asılılıqsız SVG) ═══
+function getActivityCounts(){
+  // Hər gün üçün "aktivlik" sayı: bitmiş tapşırıqlar + maliyyə qeydləri + yuxu qeydləri + çəki qeydləri
+  const counts={};
+  const bump=(dateStr)=>{ if(!dateStr)return; counts[dateStr]=(counts[dateStr]||0)+1; };
+  calTasks.filter(t=>t.done).forEach(t=>bump(t.date));
+  (typeof finLogs!=='undefined'?finLogs:[]).forEach(e=>bump(e.date));
+  (typeof sleepLog!=='undefined'?sleepLog:[]).forEach(e=>bump(e.date));
+  (typeof weightLog!=='undefined'?weightLog:[]).forEach(e=>bump(e.date));
+  return counts;
+}
+
+function renderActivityHeatmap(){
+  const holder=document.getElementById('activity-heatmap');
+  if(!holder)return;
+  const counts=getActivityCounts();
+  const cell=11, gap=3, weeks=14;
+  const today=new Date();
+  const start=new Date(today); start.setDate(start.getDate()-(weeks*7-1));
+  // Bazar ertəsinə düzəlt (sətir başlanğıcı)
+  const startOffset=(start.getDay()+6)%7;
+  start.setDate(start.getDate()-startOffset);
+
+  const days=[];
+  for(let i=0;i<weeks*7;i++){
+    const d=new Date(start); d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+  const max=Math.max(1,...Object.values(counts));
+  const levelColor=(n)=>{
+    if(!n)return 'var(--bg2)';
+    const r=n/max;
+    if(r>0.66)return 'var(--pink)';
+    if(r>0.33)return 'var(--rose)';
+    return 'var(--mauve)';
+  };
+  const w=weeks*(cell+gap)+20, h=7*(cell+gap)+14;
+  let svg=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
+  days.forEach((d,i)=>{
+    const col=Math.floor(i/7), row=i%7;
+    const dateStr=d.toLocaleDateString('az-AZ');
+    const n=counts[dateStr]||0;
+    const x=20+col*(cell+gap), y=row*(cell+gap);
+    svg+=`<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2" fill="${levelColor(n)}"><title>${dateStr}: ${n} fəaliyyət</title></rect>`;
+  });
+  svg+=`</svg>`;
+  holder.innerHTML=svg;
+}
+
+// ═══ OMDb API — film/serial üçün poster, janr, aktyor heyəti, IMDb reytinqi ═══
+// (cavestri/themoviedb-javascript-library və idvorkin/imdb-api tərzi funksionallıq,
+//  brauzerdə tək fetch() çağırışı ilə, əlavə kitabxana lazım olmadan)
+let omdbKeyPromiseInFlight = null;
+
+async function ensureOmdbKey(){
+  let key = load('omdbApiKey', '');
+  if(key) return key;
+  if(omdbKeyPromiseInFlight) return omdbKeyPromiseInFlight;
+  omdbKeyPromiseInFlight = (async () => {
+    const { value } = await Swal.fire({
+      title: '🎬 OMDb API açarı lazımdır',
+      html: `Film/serial üçün poster, janr, aktyor heyəti və IMDb reytinqini avtomatik gətirmək üçün pulsuz OMDb API açarı lazımdır.<br><br>Açarı buradan pulsuz alın (e-poçtunuza saniyələr içində gəlir): <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" style="color:#7c3aed">omdbapi.com/apikey.aspx</a>`,
+      input: 'text',
+      inputPlaceholder: 'API açarını bura yapışdırın',
+      confirmButtonText: 'Yadda saxla',
+      confirmButtonColor: '#7c3aed',
+      showCancelButton: true,
+      cancelButtonText: 'İndi yox'
+    });
+    omdbKeyPromiseInFlight = null;
+    if (value) { save('omdbApiKey', value.trim()); return value.trim(); }
+    return null;
+  })();
+  return omdbKeyPromiseInFlight;
+}
+
+function changeOmdbKey(){
+  save('omdbApiKey', '');
+  ensureOmdbKey();
+}
+
+// entry obyektini birbaşa (referans ilə) doldurur — mediaList massivində eyni obyektdir,
+// ona görə heç bir index izləməyə ehtiyac yoxdur.
+async function autoFetchMediaInfo(entry, title){
+  if(!title) return;
+  entry.imdb = entry.imdb || '⏳';
+  save('mediaList', mediaList); renderMedia();
+  try{
+    const apiKey = await ensureOmdbKey();
+    if(!apiKey){ entry.imdb=''; save('mediaList',mediaList); renderMedia(); return; }
+    const type = entry.type==='serial' ? 'series' : 'movie';
+    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&type=${type}&apikey=${apiKey}`);
+    const data = await res.json();
+    if(data && data.Response === 'True'){
+      entry.imdb = (data.imdbRating && data.imdbRating !== 'N/A') ? data.imdbRating : '';
+      if(data.Poster && data.Poster !== 'N/A') entry.poster = data.Poster;
+      if(data.Genre && data.Genre !== 'N/A') entry.genre = data.Genre;
+      if(data.Actors && data.Actors !== 'N/A') entry.cast = data.Actors;
+      if(data.Year && data.Year !== 'N/A' && !entry.year) entry.year = data.Year;
+    } else {
+      entry.imdb = '';
+      if(data && data.Error === 'Invalid API key!'){
+        save('omdbApiKey','');
+        Swal.fire({icon:'error',title:'OMDb API açarı yanlışdır',text:'Zəhmət olmasa 🔑 düyməsi ilə düzgün açar daxil edin.',confirmButtonColor:'#7c3aed'});
+      }
+    }
+  }catch(e){
+    console.warn('OMDb axtarışı uğursuz oldu:', e);
+    entry.imdb = '';
+  }
+  save('mediaList', mediaList);
+  renderMedia();
+}
+
+// ═══ nhn/tui.calendar — tam funksiyalı ay görünüşü, drag-and-drop ilə tarix dəyişmə ═══
+let tuiCalendarInstance=null;
+
+function initTuiCalendarIfNeeded(){
+  const el=document.getElementById('tui-cal');
+  if(!el || tuiCalendarInstance || typeof tui==='undefined' || !tui.Calendar) return;
+  tuiCalendarInstance=new tui.Calendar('#tui-cal',{
+    defaultView:'month',
+    useDetailPopup:true,
+    usageStatistics:false,
+    calendars:[{id:'tasks',name:'Tapşırıqlar',backgroundColor:'#7c3aed'}],
+    month:{startDayOfWeek:1}
+  });
+  // Sürüşdürüb-atma ilə tarix dəyişəndə calTasks-ı da yenilə
+  tuiCalendarInstance.on('beforeUpdateEvent',(eventData)=>{
+    const {event,changes}=eventData;
+    tuiCalendarInstance.updateEvent(event.id,event.calendarId,changes);
+    const idx=parseInt(String(event.id).replace('task-',''),10);
+    if(!isNaN(idx) && calTasks[idx] && changes && changes.start){
+      const newDate=changes.start.toDate?changes.start.toDate():new Date(changes.start);
+      calTasks[idx].date=newDate.toLocaleDateString('az-AZ');
+      save('calTasks',calTasks);
+      renderCalSelList();renderCalToday();renderActivityHeatmap();
+    }
+  });
+  refreshTuiCalendarEvents();
+}
+
+function refreshTuiCalendarEvents(){
+  if(!tuiCalendarInstance)return;
+  tuiCalendarInstance.clear();
+  const events=calTasks.map((t,i)=>{
+    const d=parseDateAZ(t.date);
+    return {
+      id:'task-'+i,
+      calendarId:'tasks',
+      title:(t.done?'✅ ':'')+t.text,
+      start:d,
+      end:d,
+      isAllday:true,
+      category:'allday',
+      backgroundColor:t.done?'#22c55e':'#7c3aed'
+    };
+  });
+  tuiCalendarInstance.createEvents(events);
+}
+
+function renderCalGrid(){
+  const grid=document.getElementById('cal-grid');
+  if(!grid)return;
+  const y=calViewDate.getFullYear(), m=calViewDate.getMonth();
+  document.getElementById('cal-month-label').textContent=`${CAL_MONTHS[m]} ${y}`;
+  const firstDay=new Date(y,m,1);
+  const startOffset=(firstDay.getDay()+6)%7; // Bazar ertəsi = 0
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=getTodayStr();
+
+  let html=CAL_DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++)html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=new Date(y,m,d).toLocaleDateString('az-AZ');
+    const hasTask=calTasks.some(t=>t.date===dateStr);
+    const cls=['cal-day'];
+    if(dateStr===today)cls.push('today');
+    if(dateStr===calSelectedDate)cls.push('selected');
+    if(hasTask)cls.push('has-task');
+    html+=`<div class="${cls.join(' ')}" onclick="calSelectDay('${dateStr}')">${d}</div>`;
+  }
+  grid.innerHTML=html;
+  refreshTuiCalendarEvents();
+}
+
+function renderCalSelList(){
+  const el=document.getElementById('cal-sel-list');
+  const label=document.getElementById('cal-sel-label');
+  if(!el)return;
+  const today=getTodayStr();
+  label.textContent=calSelectedDate===today?'Bu gün üçün tapşırıq əlavə et':`${calSelectedDate} üçün tapşırıq əlavə et`;
+  const rows=calTasks.map((t,i)=>({t,i})).filter(x=>x.t.date===calSelectedDate);
+  el.innerHTML=rows.length
+    ? rows.map(x=>calTaskRow(x.t,x.i)).join('')
+    : '<p class="empty">Bu tarix üçün tapşırıq yoxdur.</p>';
+}
+
+renderWeightCard();
+renderFitMetrics();
+renderCardioLog();
+renderProteinScale();
+renderFood();
+renderMedia();
+renderMediaMetrics();
+renderFinLog();
+renderBorcList();
+renderInvList();
+renderInvestTrades();
+renderPulList();
+renderSleep();
+renderWeekChart();
+loadFin();
+calcFin();
+renderCalGrid();
+renderCalSelList();
+renderCalToday();
+renderActivityHeatmap();
+
+// Lucide ikonlarını (data-lucide atributlu <i> teqləri) SVG-yə çevir
+if(typeof lucide!=='undefined') lucide.createIcons();
+
+setInterval(()=>{
+  if(document.getElementById('s-fin').classList.contains('on')){renderBorcList();calcFin();}
+},60000);
+
+// ═══ PWA / OFFLINE (Workbox service worker) ═══
+// Qeyd: sw.js və manifest.json bu fayl ilə eyni qovluqda olmalıdır və sayt
+// http(s) və ya localhost üzərindən açılmalıdır (file:// -da işləməyəcək).
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(err=>console.warn('SW qeydiyyatı alınmadı:',err));
+  });
+}
+
+</script>
+
+<!-- ═══ pmndrs/valtio (reaktiv UI state) + xenova/transformers (on-device AI) ═══ -->
+<script type="module">
+  import { proxy, subscribe } from 'valtio/vanilla';
+
+  // Kiçik, real valtio inteqrasiyası: aktiv bölmə + son əməliyyat vaxtını
+  // reaktiv şəkildə izləyir və sync statusu sətrinin yanında göstərir.
+  window.uiState = proxy({ activeSection: 'fit', lastAction: null });
+  subscribe(window.uiState, () => {
+    const el = document.getElementById('sync-status');
+    if (el && window.uiState.lastAction) {
+      const t = new Date(window.uiState.lastAction).toLocaleTimeString('az-AZ', {hour:'2-digit', minute:'2-digit'});
+      el.title = `Son fəaliyyət (valtio ilə izlənir): ${window.uiState.activeSection} — ${t}`;
+    }
+  });
+
+  // Transformers.js (xenova/transformers) — model yalnız ilk klikdə,
+  // lazımi olduqda yüklənir (böyük fayl olduğu üçün ilk yükləmə vaxt apara bilər).
+  let sentimentPipeline = null;
+  window.analyzeNoteSentiment = async function () {
+    const input = document.getElementById('ai-note-input');
+    const out = document.getElementById('ai-note-result');
+    const btn = document.getElementById('ai-note-btn');
+    const text = input.value.trim();
+    if (!text) { out.textContent = 'Əvvəlcə bir qeyd yazın.'; return; }
+
+    btn.disabled = true;
+    out.textContent = '⏳ Model yüklənir / təhlil edilir (ilk dəfə bir az çəkə bilər)...';
+    try {
+      if (!sentimentPipeline) {
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+        sentimentPipeline = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
+      }
+      const result = await sentimentPipeline(text);
+      const r = result[0];
+      const mood = r.label === 'POSITIVE' ? '😊 Pozitiv' : '😔 Neqativ';
+      out.innerHTML = `${mood} <span style="color:var(--text3)">(əminlik: ${(r.score*100).toFixed(0)}%)</span>`;
+      if (window.uiState) { window.uiState.lastAction = new Date().toISOString(); }
+    } catch (e) {
+      console.warn('Transformers.js xətası:', e);
+      out.textContent = 'AI modeli yüklənə bilmədi (internet/CORS yoxlayın).';
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  // formkit/auto-animate — siyahılara (əlavə/silmə/tab keçidi) sıfır-konfiqurasiyalı animasiya.
+  // innerHTML tam yenilənsə belə, auto-animate köhnə/yeni elementləri müqayisə edib
+  // FLIP texnikası ilə yumşaq keçid yaradır — əlavə CSS yazmağa ehtiyac yoxdur.
+  try {
+    const { autoAnimate } = await import('https://esm.sh/@formkit/auto-animate@0.9.0');
+    window.autoAnimate = autoAnimate;
+    document.querySelectorAll('.elist, #pul-list, .kanban-list').forEach(el => autoAnimate(el));
+  } catch (e) {
+    console.warn('auto-animate yüklənmədi:', e);
+  }
+
+  // PhotoSwipe — film/serial/kitab posterlərinə klikləyəndə tam-ekran, pinch-zoom
+  // edilə bilən lightbox açır. Delegated-event əsaslı olduğu üçün kanban lövhəsi
+  // hər dəfə yenidən render olunanda belə (renderMedia) əlavə koda ehtiyac yoxdur.
+  try {
+    const PhotoSwipeLightbox = (await import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js')).default;
+    const pswpLightbox = new PhotoSwipeLightbox({
+      gallery: '#ml',
+      children: 'a.pswp-poster',
+      pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js')
+    });
+    pswpLightbox.init();
+  } catch (e) {
+    console.warn('PhotoSwipe yüklənmədi:', e);
+  }
+
+  // Hammer.js — barmaqla sağa/sola sürüşdürüb bölmələr (tablar) arasında keçid.
+  // Sortable ilə idarə olunan siyahılar, üfüqi sürüşən kanban lövhəsi, qrafiklər,
+  // modallar və təqvim üzərində toqquşmanın qarşısını almaq üçün həmin zonalarda
+  // başlayan sürüşmələr məqsədli şəkildə nəzərə alınmır.
+  if (typeof Hammer !== 'undefined') {
+    const swipeIgnoreSelector = '.media-kanban, .kanban-list, .kanban-card, .elist, #pul-list, canvas, .modal-bg, .modal, input, textarea, select, #tui-cal, .cal-grid, .lbitem';
+    const mc = new Hammer(document.querySelector('.wrap'), { touchAction: 'auto' });
+    mc.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL, threshold: 40, velocity: 0.3 });
+    mc.on('swipeleft swiperight', (ev) => {
+      if (ev.target.closest(swipeIgnoreSelector)) return;
+      const order = window.SEC_ORDER || ['fit','food','media','fin','cal'];
+      const idx = order.indexOf(window._lastSecName || 'fit');
+      if (ev.type === 'swipeleft' && idx < order.length - 1) sw(order[idx + 1]);
+      if (ev.type === 'swiperight' && idx > 0) sw(order[idx - 1]);
+    });
+  }
+</script>
+</body>
+</html>
